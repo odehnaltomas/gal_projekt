@@ -10,7 +10,7 @@ Args parse_args(int argc, char **argv)
 	
 	for(;;)
 	{
-		switch(getopt(argc, argv, "a:f:n:h"))
+		switch(getopt(argc, argv, "a:f:n:h:gpn:m:o:"))
 		{
 			case 'a':
 				try {
@@ -28,10 +28,38 @@ Args parse_args(int argc, char **argv)
 				res.source_file_provided = true;
 				continue;
 
+		    case 'g':
+		        res.generate_graph = true;
+                continue;
+
+            case 'p':
+                res.want_planar = true;
+                continue;
+
+            case 'n':
+                res.num_nodes = std::stoi(optarg, nullptr, 10);
+                continue;
+
+            case 'm':
+                res.num_edges = std::stoi(optarg, nullptr, 10);
+                continue;
+
+            case 'o':
+                res.output_file = optarg;
+                res.output_file_provided = true;
+                continue;
+
 			case '?':
 			case 'h':
 			default :
-				std::cerr << "Usage example: " << std::endl;
+				std::cerr << "Usage example: " << std::endl <<
+				"\t" << "-a {left-right|boyer-myrvold} - choose algorithm to test if graph is planar." << std::endl <<
+				"\t" << "-f PATH - path to source file of graph." << std::endl <<
+				"\t" << "-g - generate (non-)planar graph:" << std::endl <<
+				"\t" << "-p - use this option to generate planar graph. NOTE: Non-planar graph will be complete graph" << std::endl <<
+				"\t" << "-n X - generated graph will have X nodes" << std::endl <<
+				"\t" << "-m X - generated graph will have X edges (!for planar graph!) n <= X <= (3n-6). X is adjusted if is out of bounds." << std::endl <<
+				"\t" << "-o PATH - generated graph is saved in file PATH" << std::endl;
 				exit(1);
 
 			case -1:
@@ -40,16 +68,23 @@ Args parse_args(int argc, char **argv)
 
 		break;
 	}
-	
-	if (!res.algorithm_provided) {
-		std::cerr << "No algorithm has been selected!" << std::endl;
-		exit(1);
-	}
-	
-	if (!res.source_file_provided) {
-		std::cerr << "No graph source file has been provided!" << std::endl;
-		exit(1);
-	}
+
+	if (!res.generate_graph) {
+        if (!res.algorithm_provided) {
+            std::cerr << "No algorithm has been selected!" << std::endl;
+            exit(1);
+        }
+
+        if (!res.source_file_provided) {
+            std::cerr << "No graph source file has been provided!" << std::endl;
+            exit(1);
+        }
+    } else {
+        if (!res.output_file_provided) {
+            std::cerr << "No output file for generated graph has been provided!" << std::endl;
+            exit(1);
+        }
+    }
 	
 	return res;
 }

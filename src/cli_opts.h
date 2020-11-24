@@ -4,11 +4,22 @@
 #include "algorithms.h"
 	
 struct Args {
+    Args() : want_planar(false), num_nodes(0), num_edges(0) {}    // Set default value of 'want_planar' to true
+
 	Algorithm algorithm;
 	bool algorithm_provided;
 	
 	std::string source_file;
 	bool source_file_provided;
+
+	bool generate_graph;
+	bool want_planar;
+	unsigned int num_nodes;
+	unsigned int num_edges;
+
+	std::string output_file;
+	bool output_file_provided;
+
 };
 typedef struct Args Args;
 
