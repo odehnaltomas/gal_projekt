@@ -23,3 +23,6 @@ _deps
 
 /ogdf
 /gal_projekt
+/build
+/out
+/.vscode
