@@ -4,7 +4,7 @@
 #include "algorithms.h"
 	
 struct Args {
-    Args() : want_planar(false), num_nodes(0), num_edges(0) {}    // Set default value of 'want_planar' to true
+    Args() : generate_graph(false), want_planar(false), num_nodes(0), num_edges(0) {}    // Set default value of 'want_planar' to true
 
 	Algorithm algorithm;
 	bool algorithm_provided;

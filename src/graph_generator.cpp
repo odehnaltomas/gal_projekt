@@ -33,9 +33,11 @@ void GraphGenerator::createLayoutAndSave(Graph g, std::string fileName) {
                            GraphAttributes::nodeLabel |
                            GraphAttributes::nodeStyle |
                            GraphAttributes::edgeType |
+                            GraphAttributes::edgeLabel |
                            GraphAttributes::edgeArrow |
                            GraphAttributes::edgeStyle ); // Create graph attributes for this graph
 
+    GA.directed() = false;
     for (node v : g.nodes) { // iterate through all the node in the graph
         GA.fillColor( v ) = Color( "#FFFF00" ); // set node color to yellow
 
@@ -53,6 +55,10 @@ void GraphGenerator::createLayoutAndSave(Graph g, std::string fileName) {
         GA.bends(e);
         GA.arrowType(e) = ogdf::EdgeArrow::None;
         GA.strokeColor(e) = Color("#0000FF");
+
+        string s = to_string(e->index());
+        char const *pchar = s.c_str(); //use char const* as target type
+        GA.label( e ) = pchar;
     }
 
     SugiyamaLayout SL; //Compute a hierarchical drawing of G (using SugiyamaLayout)

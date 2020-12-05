@@ -97,22 +97,18 @@ graph
 			type	"Rect"
 		]
 	]
-	edge
+    edge
 	[
-		source	1
-		target	0
+		source	0
+		target	3
 		generalization	0
+		label "0"
 		graphics
 		[
 			type	"line"
 			arrow	"none"
 			stipple	"Solid"
 			lineWidth	1.0000000000
-			Line [
-				point [ x 45.0000000000 y 140.0000000000 ]
-				point [ x 30.0000000000 y 90.0000000000 ]
-				point [ x 75.0000000000 y 40.0000000000 ]
-			]
 			fill "#0000FF"
 		]
 	]
@@ -121,6 +117,7 @@ graph
 		source	2
 		target	0
 		generalization	0
+		label "1"
 		graphics
 		[
 			type	"line"
@@ -140,6 +137,7 @@ graph
 		source	3
 		target	2
 		generalization	0
+		label "2"
 		graphics
 		[
 			type	"line"
@@ -154,6 +152,7 @@ graph
 		source	4
 		target	2
 		generalization	0
+		label "3"
 		graphics
 		[
 			type	"line"
@@ -165,15 +164,21 @@ graph
 	]
 	edge
 	[
-		source	0
-		target	3
+		source	1
+		target	0
 		generalization	0
+		label "4"
 		graphics
 		[
 			type	"line"
 			arrow	"none"
 			stipple	"Solid"
 			lineWidth	1.0000000000
+			Line [
+				point [ x 45.0000000000 y 140.0000000000 ]
+				point [ x 30.0000000000 y 90.0000000000 ]
+				point [ x 75.0000000000 y 40.0000000000 ]
+			]
 			fill "#0000FF"
 		]
 	]
@@ -182,6 +187,7 @@ graph
 		source	3
 		target	1
 		generalization	0
+		label "5"
 		graphics
 		[
 			type	"line"
@@ -196,6 +202,7 @@ graph
 		source	0
 		target	4
 		generalization	0
+		label "6"
 		graphics
 		[
 			type	"line"

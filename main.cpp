@@ -31,8 +31,8 @@ int main(int argc, char **argv)
     }
 
 	Graph g;
-    GraphAttributes ga(g);
-    if (!GraphIO::read(g, args.source_file)) {
+    GraphAttributes ga(g, GraphAttributes::nodeLabel | GraphAttributes::edgeLabel);
+    if (!GraphIO::read(ga, g, args.source_file, GraphIO::readGML)) {
         std::cerr << "Could not load " << args.source_file << std::endl;
         return 1;
     }
@@ -45,7 +45,6 @@ int main(int argc, char **argv)
 	} else if (args.algorithm == Algorithm::BoyerMyrvold) {
 		AlgorithmBoyerMyrvold a(g, ga);
 		result = a.isPlanar();
-		
 	}
 	
 	std::cout << "Result: " << result << std::endl;
