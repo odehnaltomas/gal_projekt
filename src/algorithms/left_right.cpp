@@ -3,11 +3,13 @@
 #include <iostream>
 
 #include "left_right.h"
+#include "counting_sort.h"
 
  
 using namespace ogdf;
 
 AlgorithmLeftRight::AlgorithmLeftRight(Graph& g, GraphAttributes& ga): G(g), GA(ga) {
+    this->roots = std::vector<node>();
     this->height_max = std::numeric_limits<int>::max();
     this->height = NodeArray<int>(this->G, height_max);
     this->nestingDepth = EdgeArray<int>(this->G, -1);
@@ -16,6 +18,7 @@ AlgorithmLeftRight::AlgorithmLeftRight(Graph& g, GraphAttributes& ga): G(g), GA(
     this->parentEdgeArr = NodeArray<edge>(this->G, nullptr);
     this->oriented = EdgeArray<bool>(this->G, false);
     this->allOriented = 0;
+    this->nodeOutEdges = NodeArray<std::vector<edge>>(this->G, std::vector<edge>());
 }
 
 bool AlgorithmLeftRight::isPlanar() {
@@ -29,9 +32,10 @@ bool AlgorithmLeftRight::isPlanar() {
         return false;
     }
 
-    // Orientation part
+    /** Orientation part */
     for (node s : this->G.nodes) {
         if (this->height[s] == this->height_max) {
+            this->roots.push_back(s);
             this->height[s] = 0;
             this->doDFS1(s);
 //            std::cout << "Node: " << this->GA.label(s) << std::endl;
@@ -40,24 +44,46 @@ bool AlgorithmLeftRight::isPlanar() {
 //            }
         }
     }
-    std::cout << "----AFTER ORIENTATION----" << std::endl << "Nodes height: " << std::endl;
-    for (node s : this->G.nodes) {
-        std::cout << "\tnode id: " << this->GA.label(s) << " = " << this->height[s] << std::endl;
-    }
+//    std::cout << "----AFTER ORIENTATION----" << std::endl << "Nodes height: " << std::endl;
+//    for (node s : this->G.nodes) {
+//        std::cout << "\tnode id: " << this->GA.label(s) << " = " << this->height[s] << std::endl;
+//    }
+//
+//    std::cout << "Edges lowopt: " << std::endl;
+//    for (edge e : this->G.edges) {
+//        std::cout << "\tedge id: " << this->GA.label(e) << " = " << this->lowopt[e] << std::endl;
+//    }
+//
+//    std::cout << "Edges lowopt2: " << std::endl;
+//    for (edge e : this->G.edges) {
+//        std::cout << "\tedge id: " << this->GA.label(e) << " = " << this->lowopt2[e] << std::endl;
+//    }
+//
+//    std::cout << "Edges nesting_depth: " << std::endl;
+//    for (edge e : this->G.edges) {
+//        std::cout << "\tedge id: " << this->GA.label(e) << " = " << this->nestingDepth[e] << std::endl;
+//    }
 
-    std::cout << "Edges lowopt: " << std::endl;
-    for (edge e : this->G.edges) {
-        std::cout << "\tedge id: " << this->GA.label(e) << " = " << this->lowopt[e] << std::endl;
-    }
-
-    std::cout << "Edges lowopt2: " << std::endl;
-    for (edge e : this->G.edges) {
-        std::cout << "\tedge id: " << this->GA.label(e) << " = " << this->lowopt2[e] << std::endl;
-    }
-
-    std::cout << "Edges nesting_depth: " << std::endl;
-    for (edge e : this->G.edges) {
-        std::cout << "\tedge id: " << this->GA.label(e) << " = " << this->nestingDepth[e] << std::endl;
+//    for (node n : G.nodes) {
+//        std::cout << std::endl << std::endl << "NODE: " << GA.label(n);
+//        for (edge e : nodeOutEdges[n]) {
+//            std::cout << "\tedge id: " << GA.label(e) << ", nestingDepth: " << this->nestingDepth[e] << std::endl;
+//        }
+//    }
+    /** Testing part */
+    CntSort::CountingSort::sort(this->GA, this->G, this->nodeOutEdges, this->nestingDepth);
+//    for (node n : G.nodes) {
+//        std::cout << std::endl << std::endl << "NODE: " << GA.label(n);
+//        for (edge e : nodeOutEdges[n]) {
+//            std::cout << "\tedge id: " << GA.label(e) << ", nestingDepth: " << nestingDepth[e] << std::endl;
+//            std::cout << "\t\tsource: " << GA.label(e->source()) << ", target: " << GA.label(e->target()) << std::endl;
+//        }
+//    }
+    for (node s : this->roots) {
+        bool result = this->doDFS2(s);
+        if (result) {
+            return true;
+        }
     }
 	return false;
 }
@@ -65,7 +91,7 @@ bool AlgorithmLeftRight::isPlanar() {
 void AlgorithmLeftRight::doDFS1(node v) {
     edge parentEdge = this->parentEdgeArr[v];
     std::cout << "node: " << GA.label(v) << std::endl;
-    for (adjEntry adj : v->adjEdges()) {
+    for (adjEntry adj : v->adjEntries) {
         // If all edges are oriented stop
 //        if (this->allOriented == this->G.numberOfEdges()) {
 //            break;
@@ -87,6 +113,8 @@ void AlgorithmLeftRight::doDFS1(node v) {
             this->oriented[e] = true;
             this->allOriented++;
             w = e->target();
+
+            this->nodeOutEdges[v].push_back(e);
         } else {
             //adjEntry target = e->adjTarget();
             std::cout << "\t\tsource: " << GA.label(e->source()) << ", target: " << GA.label(e->target()) << std::endl << std::endl;
@@ -97,6 +125,8 @@ void AlgorithmLeftRight::doDFS1(node v) {
             this->oriented[e] = true;
             this->allOriented++;
             w = e->target();
+
+            this->nodeOutEdges[v].push_back(e);
         }
 
         this->lowopt[e] = this->height[v];
@@ -130,4 +160,9 @@ void AlgorithmLeftRight::doDFS1(node v) {
             }
         }
     }
+}
+
+bool AlgorithmLeftRight::doDFS2(node v) {
+    v = v;
+    return false;
 }

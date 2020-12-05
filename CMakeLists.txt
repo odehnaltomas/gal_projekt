@@ -21,6 +21,6 @@ link_libraries(OGDF)
 
 file(GLOB prog_src "main.cpp" "./src/*.cpp" "./src/**/*.cpp" "./include/*.h" "./include/**/*.h")
 
-add_executable(gal_projekt ${prog_src} src/graph_generator.cpp src/graph_generator.h)
+add_executable(gal_projekt ${prog_src})
 target_include_directories(gal_projekt PRIVATE ${OGDF_INCLUDE_DIRS} ./include ./src)
 target_link_libraries(gal_projekt)
