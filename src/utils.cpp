@@ -5,9 +5,7 @@
 
 namespace DFS
 {
-    DFS::DFS(const GraphAttributes& ga)
-        : nodes_pre(), nodes_post(), neighbors(), reachable(), pre_order(), post_order(),
-          tree(), G(ga.constGraph()), GA(ga), colours(), edge_types(), timestamp(0)
+    DFS::DFS(const GraphAttributes& ga) : G(ga.constGraph()), GA(ga), timestamp(0)
     {
         // initialize node colours
         for (auto n : this->G.nodes) {
@@ -28,6 +26,9 @@ namespace DFS
             Visit(n);
             // mark node as finished
             FinishNode(n);
+
+            // make sure there are no component entries left
+            ExtractBiconnectedComponent(n);
         }
 
         for (auto v : this->nodes_pre) {
@@ -71,6 +72,34 @@ namespace DFS
             BuildReachable(v, w, visited);
         DEBUG("}\n");
     }
+        
+    void DFS::ExtractBiconnectedComponent(node v)
+    {
+        DEBUG("%2s is AP, component contains:\n", GA.label(v).c_str());
+
+        auto component = std::vector<node>();
+        while(!nodes_depth.empty()) {
+            auto top = nodes_depth.top();
+            auto low = lowpoint[top->index()];
+            auto pre = pre_order[v->index()];
+
+            if (low >= pre) {
+                // this node is part of the biconnected component
+                DEBUG("  %2s (%2d >= %2d)\n", GA.label(top).c_str(), low, pre);
+                component.push_back(top);
+                nodes_depth.pop();
+
+            } else {
+                // this node is NOT part of the component anymore
+                DEBUG("  break - %2s (%2d < %2d)\n", GA.label(top).c_str(), low, pre);
+                break;
+
+            }
+        }
+
+        if (component.size())
+            biconnected.push_back(component);
+    }
 
     void DFS::StartNode(node v)
     {
@@ -78,10 +107,14 @@ namespace DFS
         colours[v->index()] = GRAY;
         // generate pre-order index
         pre_order[v->index()] = timestamp++;
-        // create list of child nodes
-        tree[v->index()] = std::list<int>();
+        // generate pre-order index
+        lowpoint[v->index()] = pre_order[v->index()];
+
         // save this node as processed in pre-order
         nodes_pre.push_back(v);
+
+        // create list of child nodes
+        tree[v->index()] = std::list<int>();
     }
 
     void DFS::FinishNode(node v, node parent)
@@ -90,15 +123,28 @@ namespace DFS
         colours[v->index()] = BLACK;
         // generate post-order index
         post_order[v->index()] = timestamp++;
-        // append to parent's list of child nodes
-        tree[parent ? parent->index() : -1].push_back(v->index());
+
         // save this node as processed in post-order
         nodes_post.push_back(v);
+
+        // append to parent's list of child nodes
+        auto parent_index = parent ? parent->index() : -1;
+        tree[parent_index].push_back(v->index());
+        branches[parent_index]++;
+        
+        lowpoint[parent_index] = std::min(
+            lowpoint[parent_index],
+            lowpoint[v->index()]
+        );
     }
 
-    void DFS::Visit(node v)
+    void DFS::Visit(node v, node parent)
     {
+        nodes_depth.push(v);
+
         adjEntry adj;
+        bool articulationPoint = false;
+
         // walk through edges connected to this node
         for(adj = v->firstAdj(); adj; adj = adj->succ()) {
             // only work with source edges
@@ -154,10 +200,28 @@ namespace DFS
                 // mark node as started
                 StartNode(adjNode);
                 // visit node and recursively its adjacent nodes
-                Visit(adjNode);
+                Visit(adjNode, v);
                 // mark node as finished
                 FinishNode(adjNode, v);
+
+                if (lowpoint[adjNode->index()] >= pre_order[v->index()])
+                    // parent might be articulation point
+                    articulationPoint = true;
+
+            } else {
+                // adjacency to already visited node
+                // acquire lowest value
+                lowpoint[v->index()] = std::min(
+                    lowpoint[v->index()],
+                    pre_order[adjNode->index()]
+                );
+
             }
+        }
+
+        if ((parent != nullptr && articulationPoint)
+                || (parent == nullptr && branches[v->index()] > 1)) {
+            ExtractBiconnectedComponent(v);
         }
     }
 }

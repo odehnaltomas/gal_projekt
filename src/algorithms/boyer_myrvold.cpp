@@ -266,15 +266,25 @@ bool AlgorithmBoyerMyrvold::isPlanar() {
 	DEBUG_EXPR(this->GA.directed());
 	auto dfsForest = dfs.nodes_pre;
 	
+	printf("DF-Tree:\n");
 	for (auto entry : dfsForest) {
 		auto pre = dfs.pre_order[entry->index()];
 		auto post = dfs.post_order[entry->index()];
-		printf("  %2d = %3d, %3d\n", entry->index(), pre, post);
+		auto low = dfs.lowpoint[entry->index()];
+		printf("  %2s (%2d) = %3d, %3d, %3d\n", this->GA.label(entry).c_str(),
+			entry->index(), pre, post, low);
 	}
 	
-	auto mapping = stNumbering();
-	for (auto entry : mapping) {
-		printf("  %2d = %2d\n", entry.first, entry.second);
+	printf("Bi-connected components:\n");
+	for (auto component : dfs.biconnected) {
+		printf("  Component contains:\n");
+		for (auto entry : component) {
+			auto pre = dfs.pre_order[entry->index()];
+			auto post = dfs.post_order[entry->index()];
+			auto low = dfs.lowpoint[entry->index()];
+			printf("    %2s (%2d) = %3d, %3d, %3d\n", this->GA.label(entry).c_str(),
+				entry->index(), pre, post, low);
+		}
 	}
 
 	return false;

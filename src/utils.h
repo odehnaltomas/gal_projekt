@@ -1,4 +1,5 @@
 #pragma once
+#include<stack>
 #include<list>
 #include<map>
 #include<ogdf/basic/Graph.h>
@@ -21,13 +22,6 @@ enum EdgeType {UNPROCESSED, TREE, BACK, FORWARD, CROSS};
 
 namespace DFS
 {
-    struct Entry {
-        const int DFI_in;
-        const int DFI_out;
-        const node v;
-    };
-    typedef struct Entry Entry;
-    
     typedef std::map<int, int> NodeOrderMapping;
     typedef std::map<int, EdgeType> EdgeTypeMapping;
 
@@ -39,11 +33,16 @@ namespace DFS
     public:
         std::vector<node> nodes_pre;
         std::vector<node> nodes_post;
+
+        std::map<int, int> branches;
         std::map<int, std::vector<node>> neighbors;
         std::map<int, std::vector<node>> reachable;
 
+        std::vector<std::vector<node>> biconnected;
+
         NodeOrderMapping pre_order;
         NodeOrderMapping post_order;
+        NodeOrderMapping lowpoint;
 
         std::map<int, std::list<int>> tree;
 
@@ -56,6 +55,8 @@ namespace DFS
         const Graph& G;
         const GraphAttributes& GA;
 
+        std::stack<node> nodes_depth;
+
         std::map<int, NodeColour> colours;
         EdgeTypeMapping edge_types;
 
@@ -66,8 +67,10 @@ namespace DFS
         
         void BuildReachable(node v);
         void BuildReachable(node v, node w, std::map<int, bool> &visited);
+        
+        void ExtractBiconnectedComponent(node v);
 
-        void Visit(node v);
+        void Visit(node v, node parent = nullptr);
     };
 }
 
