@@ -17,6 +17,8 @@
  
 using namespace ogdf;
 
+enum EdgeType {UNPROCESSED, TREE, BACK, FORWARD, CROSS};
+
 namespace DFS
 {
     struct Entry {
@@ -26,36 +28,63 @@ namespace DFS
     };
     typedef struct Entry Entry;
     
-    typedef std::pair<node, node> NodePair;
+    typedef std::map<int, int> NodeOrderMapping;
+    typedef std::map<int, EdgeType> EdgeTypeMapping;
 
+    // DFS specific node colouring
     enum NodeColour {WHITE, GRAY, BLACK};
-
-    enum EdgeType {TREE, BACK, FORWARD, CROSS};
 
     class DFS
     {
     public:
         std::vector<node> nodes_pre;
         std::vector<node> nodes_post;
+        std::map<int, std::vector<node>> neighbors;
+        std::map<int, std::vector<node>> reachable;
 
-        std::map<int, int> pre_order;
-        std::map<int, int> post_order;
+        NodeOrderMapping pre_order;
+        NodeOrderMapping post_order;
 
-        std::map<int, EdgeType> edge_types;
         std::map<int, std::list<int>> tree;
 
         DFS(const GraphAttributes& ga);
+        
+        EdgeType edgeType(adjEntry adj);
+        void edgeType(adjEntry adj, EdgeType type);
     
     protected:
         const Graph& G;
         const GraphAttributes& GA;
 
         std::map<int, NodeColour> colours;
+        EdgeTypeMapping edge_types;
+
         int timestamp;
 
         void StartNode(node v);
         void FinishNode(node v, node parent = nullptr);
+        
+        void BuildReachable(node v);
+        void BuildReachable(node v, node w, std::map<int, bool> &visited);
 
         void Visit(node v);
     };
+}
+
+namespace GraphUtils
+{
+    std::vector<adjEntry> getBackEdges(node v, DFS::EdgeTypeMapping &edge_types);
+
+    node getTargetNodeFor(node source, adjEntry adj);
+
+    node L(node v, DFS::DFS &dfs);
+}
+
+namespace Generic
+{
+    template<class T>
+    void merge(std::vector<T> &vec1, std::vector<T> vec2);
+
+    template<class T>
+    void makeUnique(std::vector<T> &vec1);
 }
