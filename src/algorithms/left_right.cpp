@@ -171,13 +171,12 @@ void AlgorithmLeftRight::doDFS1(node v) {
 
 bool AlgorithmLeftRight::doDFS2(node v) {
     edge parentEdge = this->parentEdgeArr[v];
-    std::cout << "tady uzel" << std::endl;
+
     for (edge e : this->nodeOutEdges[v]) {
         this->stackBottom[e] = this->S.size();
 
-        std::cout << "tady hrana" << std::endl;
         edge trg_par_edge = this->parentEdgeArr[e->target()];
-        if (trg_par_edge != nullptr && !EdgeElement::compare(*(trg_par_edge), *e)) { /** TREE EDGE */
+        if ((trg_par_edge != nullptr) && !EdgeElement::compare(*(trg_par_edge), *e)) { /** TREE EDGE */
             bool result = this->doDFS2(e->target());
             if (!result) {
                 return false;
@@ -220,7 +219,7 @@ bool AlgorithmLeftRight::doDFS2(node v) {
 /**
  * This method do constraint integration. It is the most essential step of this algorithm.
  * @param e Edge to which added constraints are associated.
- * @param parentEdge 
+ * @param parentEdge
  * @return false if any condition is violated (graph is not planar), otherwise true (graph is planar).
  */
 bool AlgorithmLeftRight::addConstraints(edge e, edge parentEdge) {

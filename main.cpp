@@ -19,13 +19,13 @@ int main(int argc, char **argv)
 	    if (args.want_planar) {
             g->generatePlanarGraph(args.num_nodes, args.num_edges, args.output_file);
 
-            std::cout << "Generated PLANAR graph '" << args.output_file << "' with " <<
-                args.num_nodes << " and " << args.num_edges << " edges." << std::endl;
+//            std::cout << "Generated PLANAR graph '" << args.output_file << "' with " <<
+//                args.num_nodes << " and " << args.num_edges << " edges." << std::endl;
 	    } else {
 	        g->generateNonplanarGraph(args.num_nodes, args.output_file);
 
-            std::cout << "Generated NON-PLANAR graph '" << args.output_file << "' with " <<
-                      args.num_nodes << " and " << args.num_edges << " edges." << std::endl;
+//            std::cout << "Generated NON-PLANAR graph '" << args.output_file << "' with " <<
+//                      args.num_nodes << " and " << args.num_edges << " edges." << std::endl;
 	    }
         return 0;
     }
