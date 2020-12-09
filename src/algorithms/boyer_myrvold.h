@@ -30,6 +30,9 @@ protected:
 
 	std::vector<std::pair<node, adjEntry>> pathfinder(node v);
 
+	std::vector<std::vector<adjEntry>> pathfinder_(node v);
+	void pathfinder_(node v, std::vector<adjEntry>& path, std::vector<std::vector<adjEntry>>& paths);
+
 	std::vector<std::pair<int, adjEntry>> orderedEdges();
 
 	std::map<int, int> stNumbering();

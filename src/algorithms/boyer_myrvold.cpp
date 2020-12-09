@@ -269,17 +269,23 @@ auto edges = std::vector<std::pair<int, adjEntry>>();
 		auto adj = e->adjSource();
 		auto v = adj->theNode();
 		auto w = adj->twinNode();
+		
+		DEBUG("  processing edge (%2s -> %2s)\n", GA.label(v).c_str(), GA.label(w).c_str());
+		if (dfs.edgeType(adj) == EdgeType::TREE && dfs.pre(v) > dfs.pre(w)) {
+			// v has been discovered AFTER w, this DF-Tree edge must be reverted
+			std::swap(v, w);
+			DEBUG("    correcting to (%2s -> %2s)\n", GA.label(v).c_str(), GA.label(w).c_str());
+			adj = e->adjTarget();
+			
+		} else if (dfs.edgeType(adj) == EdgeType::BACK && dfs.pre(v) < dfs.pre(w)) {
+			// v has been discovered BEFORE w, this DF-Tree BACK edge must be reverted
+			std::swap(v, w);
+			DEBUG("    correcting to (%2s -> %2s)\n", GA.label(v).c_str(), GA.label(w).c_str());
+			adj = e->adjTarget();
+		}
 
 		int val = -1;
 		if (dfs.edgeType(adj) == EdgeType::BACK) {
-			DEBUG("  this is BACK edge (%2s -> %2s)\n", GA.label(v).c_str(), GA.label(w).c_str());
-			if (dfs.pre(v) < dfs.pre(w)) {
-				// v has been discovered BEFORE w
-				// since this is BACK edge - v surely is ancestor of w
-				std::swap(v, w);
-				DEBUG("    correction to (%2s -> %2s)\n", GA.label(v).c_str(), GA.label(w).c_str());
-				adj = e->adjTarget();
-			}
 			val = 2 * dfs.pre(w);
 
 		} else if (dfs.edgeType(adj) == EdgeType::TREE
@@ -302,14 +308,52 @@ auto edges = std::vector<std::pair<int, adjEntry>>();
 	} customLess;
 	std::sort(edges.begin(), edges.end(), customLess);
 
+	for (auto e : edges)
+		ordered_adjs[e.second->theNode()->index()].push_back(e.second);
+
 	return edges;
+}
+
+std::vector<std::vector<adjEntry>> AlgorithmBoyerMyrvold::pathfinder_(node v) {
+	auto paths = std::vector<std::vector<adjEntry>>();
+	auto path = std::vector<adjEntry>();
+	pathfinder_(v, path, paths);
+	return paths;
+}
+
+void AlgorithmBoyerMyrvold::pathfinder_(node v, std::vector<adjEntry>& path, std::vector<std::vector<adjEntry>>& paths) {
+	DEBUG("processing node %2s\n", GA.label(v).c_str());
+	for (auto w_adj : ordered_adjs[v->index()]) {
+		auto w = GraphUtils::getTargetNodeFor(v, w_adj);
+		if (dfs.edgeType(w_adj) == EdgeType::TREE) {
+			DEBUG("  adding TREE edge %2s (%2s -> %2s)\n", GA.label(w_adj->theEdge()).c_str(),
+				GA.label(v).c_str(), GA.label(w).c_str());
+
+			path.push_back(w_adj);
+			pathfinder_(w, path, paths);
+
+		} else {
+			// BACK or FORWARD edges
+			DEBUG("  adding BACK/FWD edge %2s (%2s -> %2s)\n", GA.label(w_adj->theEdge()).c_str(),
+				GA.label(v).c_str(), GA.label(w).c_str());
+
+			path.push_back(w_adj);
+			paths.push_back(path);
+
+			DEBUG("    starting new path\n");
+			path = std::vector<adjEntry>();
+
+		}
+	}
 }
 
 bool AlgorithmBoyerMyrvold::isPlanar() {
 	DEBUG_EXPR(GA.directed());
 	auto dfsForest = dfs.nodes_pre;
+	auto edges = orderedEdges();
+	auto paths = pathfinder_(dfs.nodes_pre[0]);
 	
-	DEBUG("DF-Tree:\n");
+	DEBUG("\nDF-Tree:\n");
 	for (auto v : dfsForest) {
 		auto pre = dfs.pre(v);
 		auto post = dfs.post(v);
@@ -319,7 +363,7 @@ bool AlgorithmBoyerMyrvold::isPlanar() {
 			GA.label(v).c_str(), v->index(), pre, post, lowpt1, lowpt2);
 	}
 	
-	DEBUG("Bi-connected components:\n");
+	DEBUG("\nBi-connected components:\n");
 	for (auto component : dfs.biconnected) {
 		DEBUG("  Component contains:\n");
 		for (auto v : component) {
@@ -332,22 +376,43 @@ bool AlgorithmBoyerMyrvold::isPlanar() {
 		}
 	}
 
-	auto edges = orderedEdges();
-	DEBUG("Ordered edges:\n");
+	DEBUG("\nOrdered edges:\n");
 	for (auto entry : edges) {
-		auto v = entry.second->theNode();
-		auto w = entry.second->twinNode();
-
-		ordered_adjs[v->index()].push_back(entry.second);
-		ordered_adjs[w->index()].push_back(entry.second->twin());
+		auto w_adj = entry.second;
+		auto v = w_adj->theNode();
+		auto w = w_adj->twinNode();
 		
 		DEBUG("  %2d: %2s (%2d) -> %2s (%2d)  %s\n", entry.first,
 			GA.label(v).c_str(), v->index(),
 			GA.label(w).c_str(), w->index(),
-			dfs.edgeType(entry.second) == EdgeType::BACK ? "IS BACK" : "");
+			dfs.edgeType(w_adj) == EdgeType::BACK ? "IS BACK" : "");
 	}
 
-	
+	DEBUG("\nPaths:\n");
+	DEBUG_EXPR(paths.size());
+	for (auto path : paths) {
+		//DEBUG("  ");
+		//DEBUG_EXPR(path.size());
+		auto first_adj = true;
+		for (auto adj : path) {
+			auto v = adj->theNode();
+			auto w = adj->twinNode();
+			
+			if (first_adj) {
+				DEBUG("  %2s (%2d) -> %2s (%2d)",
+					GA.label(v).c_str(), v->index(),
+					GA.label(w).c_str(), w->index());
+				first_adj = false;
+
+			} else {
+				DEBUG(" -> %2s (%2d)",
+					GA.label(w).c_str(), w->index());
+
+			}
+		}
+
+		DEBUG("\n");
+	}
 
 	if (G.numberOfEdges() > 3 * G.numberOfNodes() - 3
 			|| (G.numberOfNodes() >= 3 && G.numberOfEdges() > 3 * G.numberOfNodes() - 6)) {
