@@ -19,6 +19,8 @@ public:
 protected:
 	std::map<int, bool> edge_old;
 	std::map<int, bool> node_old;
+
+	std::map<int, std::vector<adjEntry>> ordered_adjs;
 	
 	void mark_old(node v);
 	void mark_old(adjEntry adj);
@@ -27,6 +29,8 @@ protected:
 	bool is_old(adjEntry adj);
 
 	std::vector<std::pair<node, adjEntry>> pathfinder(node v);
+
+	std::vector<std::pair<int, adjEntry>> orderedEdges();
 
 	std::map<int, int> stNumbering();
 };

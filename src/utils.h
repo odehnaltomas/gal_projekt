@@ -40,14 +40,16 @@ namespace DFS
 
         std::vector<std::vector<node>> biconnected;
 
-        NodeOrderMapping pre_order;
-        NodeOrderMapping post_order;
-        NodeOrderMapping lowpoint;
-
         std::map<int, std::list<int>> tree;
 
         DFS(const GraphAttributes& ga);
         
+        int pre(node v);
+        int post(node v);
+        int low1(node v);
+        int low2(node v);
+
+        EdgeType edgeType(edge e);
         EdgeType edgeType(adjEntry adj);
         void edgeType(adjEntry adj, EdgeType type);
     
@@ -57,12 +59,17 @@ namespace DFS
 
         std::stack<node> nodes_depth;
 
+        NodeOrderMapping pre_order;
+        NodeOrderMapping post_order;
+        NodeOrderMapping lowpt1;
+        NodeOrderMapping lowpt2;
+
         std::map<int, NodeColour> colours;
         EdgeTypeMapping edge_types;
 
         int timestamp;
 
-        void StartNode(node v);
+        void StartNode(node v, node parent = nullptr);
         void FinishNode(node v, node parent = nullptr);
         
         void BuildReachable(node v);
@@ -80,7 +87,7 @@ namespace GraphUtils
 
     node getTargetNodeFor(node source, adjEntry adj);
 
-    node L(node v, DFS::DFS &dfs);
+    node LowPoint(node v, DFS::DFS &dfs, unsigned index = 0);
 }
 
 namespace Generic
