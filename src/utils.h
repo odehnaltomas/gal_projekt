@@ -44,6 +44,7 @@ namespace DFS
 
         DFS(const GraphAttributes& ga);
         
+        node parent(node v);
         int pre(node v);
         int post(node v);
         int low1(node v);
@@ -58,6 +59,8 @@ namespace DFS
         const GraphAttributes& GA;
 
         std::stack<node> nodes_depth;
+
+        std::map<int, node> parents;
 
         NodeOrderMapping pre_order;
         NodeOrderMapping post_order;

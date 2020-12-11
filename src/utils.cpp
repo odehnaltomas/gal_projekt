@@ -36,6 +36,10 @@ namespace DFS
         }
     }
         
+    node DFS::parent(node v) {
+        return parents[v->index()];
+    }
+        
     int DFS::pre(node v) {
         return pre_order[v->index()];
     }
@@ -130,6 +134,8 @@ namespace DFS
         colours[v_id] = GRAY;
         // generate pre-order index
         pre_order[v_id] = timestamp++;
+        // set parent of v
+        parents[v->index()] = parent;
 
         // generate initial lowpoint values
         // statement A

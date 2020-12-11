@@ -53,7 +53,7 @@ Args parse_args(int argc, char **argv)
 			case 'h':
 			default :
 				std::cerr << "Usage example: " << std::endl <<
-				"\t" << "-a {left-right|boyer-myrvold} - choose algorithm to test if graph is planar." << std::endl <<
+				"\t" << "-a {left-right|hopcroft-tarjan} - choose algorithm to test if graph is planar." << std::endl <<
 				"\t" << "-f PATH - path to source file of graph." << std::endl <<
 				"\t" << "-g - generate (non-)planar graph:" << std::endl <<
 				"\t" << "-p - use this option to generate planar graph. NOTE: Non-planar graph will be complete graph" << std::endl <<
