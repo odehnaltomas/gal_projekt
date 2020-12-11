@@ -19,6 +19,11 @@ AlgorithmLeftRight::AlgorithmLeftRight(Graph& g, GraphAttributes& ga): G(g), GA(
     this->oriented = EdgeArray<bool>(this->G, false);
     this->allOriented = 0;
     this->nodeOutEdges = NodeArray<std::vector<edge>>(this->G, std::vector<edge>());
+
+    this->stackBottom = EdgeArray<unsigned int>(this->G);
+    this->side = EdgeArray<int>(this->G, 1);
+    this->ref = EdgeArray<edge>(this->G, nullptr);
+    this->lowopt_edge = EdgeArray<edge>(this->G);
 }
 
 bool AlgorithmLeftRight::isPlanar() {
@@ -27,10 +32,10 @@ bool AlgorithmLeftRight::isPlanar() {
         return true;
     }
 
-    if (this->G.numberOfEdges() > (3 * this->G.numberOfNodes() - 6)) {
-        // Planar graph can have at most (3 * N - 6), N - number of nodes
-        return false;
-    }
+//    if (this->G.numberOfEdges() > (3 * this->G.numberOfNodes() - 6)) {
+//        // Planar graph can have at most (3 * N - 6), N - number of nodes
+//        return false;
+//    }
 
     /** Orientation part */
     for (node s : this->G.nodes) {
@@ -72,17 +77,19 @@ bool AlgorithmLeftRight::isPlanar() {
 //    }
     /** Testing part */
     CntSort::CountingSort::sort(this->GA, this->G, this->nodeOutEdges, this->nestingDepth);
-//    for (node n : G.nodes) {
-//        std::cout << std::endl << std::endl << "NODE: " << GA.label(n);
-//        for (edge e : nodeOutEdges[n]) {
-//            std::cout << "\tedge id: " << GA.label(e) << ", nestingDepth: " << nestingDepth[e] << std::endl;
-//            std::cout << "\t\tsource: " << GA.label(e->source()) << ", target: " << GA.label(e->target()) << std::endl;
-//        }
-//    }
+    for (node n : G.nodes) {
+        std::cout << std::endl << std::endl << "NODE: " << GA.label(n);
+        for (edge e : nodeOutEdges[n]) {
+            std::cout << "\tedge id: " << GA.label(e) << ", nestingDepth: " << nestingDepth[e] << std::endl;
+            std::cout << "\t\tsource: " << GA.label(e->source()) << ", target: " << GA.label(e->target()) << std::endl;
+        }
+    }
     for (node s : this->roots) {
         bool result = this->doDFS2(s);
         if (result) {
             return true;
+        } else {
+            std::cout << "Graph is not planar." << std::endl;
         }
     }
 	return false;
@@ -93,9 +100,9 @@ void AlgorithmLeftRight::doDFS1(node v) {
     std::cout << "node: " << GA.label(v) << std::endl;
     for (adjEntry adj : v->adjEntries) {
         // If all edges are oriented stop
-//        if (this->allOriented == this->G.numberOfEdges()) {
-//            break;
-//        }
+        if (this->allOriented == this->G.numberOfEdges()) {
+            break;
+        }
 
         edge e = adj->theEdge();
         if (this->oriented[e]) {
@@ -109,13 +116,13 @@ void AlgorithmLeftRight::doDFS1(node v) {
         std::cout << "\t\tsource: " << GA.label(source->theNode()) << ", target: " << GA.label(e->target()) << std::endl;
 
         node w;
-        if (source->theNode() == v) {
+        if (source->theNode() == v) { /** Edge has right orientation */
             this->oriented[e] = true;
             this->allOriented++;
             w = e->target();
 
             this->nodeOutEdges[v].push_back(e);
-        } else {
+        } else { /** Edge has wrong orientation must be tured (swap source and target nodes of edge) */
             //adjEntry target = e->adjTarget();
             std::cout << "\t\tsource: " << GA.label(e->source()) << ", target: " << GA.label(e->target()) << std::endl << std::endl;
             this->G.reverseEdge(e);
@@ -163,6 +170,152 @@ void AlgorithmLeftRight::doDFS1(node v) {
 }
 
 bool AlgorithmLeftRight::doDFS2(node v) {
-    v = v;
-    return false;
+    edge parentEdge = this->parentEdgeArr[v];
+
+    for (edge e : this->nodeOutEdges[v]) {
+        this->stackBottom[e] = this->S.size();
+
+        edge trg_par_edge = this->parentEdgeArr[e->target()];
+        if ((trg_par_edge != nullptr) && !EdgeElement::compare(*(trg_par_edge), *e)) { /** TREE EDGE */
+            bool result = this->doDFS2(e->target());
+            if (!result) {
+                return false;
+            }
+        } else {
+            this->lowopt_edge[e] = e;
+            EdgeInt::EdgeInterval fst_int = EdgeInt::EdgeInterval::getEmptyInterval();
+            EdgeInt::EdgeInterval snd_int(e, e);
+            this->S.push(ConfPair::ConflictPair(fst_int, snd_int));
+        }
+
+        if (this->lowopt[e] < this->height[v]) {
+            if (!EdgeElement::compare(*e, *(this->nodeOutEdges[v].front()))) {
+                this->lowopt_edge[parentEdge] = this->lowopt_edge[this->nodeOutEdges[v].front()];
+            } else {
+                bool result = addConstraints(e, parentEdge);
+                if (!result) {
+                    return false;
+                }
+            }
+        }
+    }
+
+    if (parentEdge != nullptr) {
+        node u = parentEdge->source();
+        trimBackEdges(u);
+        if (this->lowopt[parentEdge] < this->height[u]) {
+            edge hl = this->S.top().getLeftInterval().getHighReturnEdge();
+            edge hr = this->S.top().getRightInterval().getHighReturnEdge();
+            if ((hl != nullptr) && ((hr == nullptr) || (this->lowopt[hl] > this->lowopt[hr]))) {
+                this->ref[parentEdge] = hl;
+            } else {
+                this->ref[parentEdge] = hr;
+            }
+        }
+    }
+    return true;
+}
+
+/**
+ * This method do constraint integration. It is the most essential step of this algorithm.
+ * @param e Edge to which added constraints are associated.
+ * @param parentEdge
+ * @return false if any condition is violated (graph is not planar), otherwise true (graph is planar).
+ */
+bool AlgorithmLeftRight::addConstraints(edge e, edge parentEdge) {
+    ConfPair::ConflictPair P = ConfPair::ConflictPair::getEmptyConflictPair();
+    while (this->S.size() > this->stackBottom[e]) {
+        ConfPair::ConflictPair Q = this->S.top();
+        this->S.pop();
+
+        if (!Q.getLeftInterval().isEmpty() ) {
+            Q.swapIntervals();
+        }
+        if (!Q.getLeftInterval().isEmpty() ) {
+            return false;
+        } else {
+            if (this->lowopt[Q.getRightInterval().getLowReturnEdge()] > this->lowopt[parentEdge]) { /** merge intervals */
+                if (P.getRightInterval().isEmpty()) {
+                    P.setRightInterval(Q.getRightInterval());
+                } else {
+                    this->ref[P.getRightInterval().getLowReturnEdge()] = Q.getRightInterval().getHighReturnEdge();
+                }
+                P.getRightInterval().setLowReturnEdge(Q.getRightInterval().getLowReturnEdge());
+            } else { /** make consistent */
+                this->ref[Q.getRightInterval().getLowReturnEdge()] = this->lowopt_edge[parentEdge];
+            }
+        }
+    }
+
+    ConfPair::ConflictPair Q = this->S.top();
+    while ((!this->S.empty()) && (conflicting(Q.getLeftInterval(), e) || conflicting(Q.getRightInterval(), e))) {
+        this->S.pop();
+        if (conflicting(Q.getRightInterval(), e)) {
+            Q.swapIntervals();
+        }
+        if (conflicting(Q.getRightInterval(), e)) {
+            return false;
+        } else { /** merge interval below lowpt(e) into P.R */
+            this->ref[P.getRightInterval().getLowReturnEdge()] = Q.getRightInterval().getHighReturnEdge();
+            if (Q.getRightInterval().getLowReturnEdge() != nullptr) {
+                P.getRightInterval().setLowReturnEdge(Q.getRightInterval().getLowReturnEdge());
+            }
+        }
+        if (P.getLeftInterval().isEmpty()) {
+            P.getLeftInterval().setHighReturnEdge(Q.getLeftInterval().getHighReturnEdge());
+        } else {
+            this->ref[P.getLeftInterval().getLowReturnEdge()] = Q.getLeftInterval().getHighReturnEdge();
+        }
+        P.getLeftInterval().setLowReturnEdge(Q.getLeftInterval().getLowReturnEdge());
+    }
+    if (!P.isEmpty()) {
+        this->S.push(P);
+    }
+    return true;
+}
+
+bool AlgorithmLeftRight::conflicting(EdgeInt::EdgeInterval &interval, edge b) {
+    return ((!interval.isEmpty()) && (this->lowopt[interval.getHighReturnEdge()] > this->lowopt[b]));
+}
+
+void AlgorithmLeftRight::trimBackEdges(node u){
+    /** Drop entire conflict pairs */
+    while ((!this->S.empty()) && (lowest(this->S.top()) == this->height[u])) {
+        ConfPair::ConflictPair P = this->S.top();
+        this->S.pop();
+        if (P.getLeftInterval().getLowReturnEdge() != nullptr) {
+            this->side[P.getLeftInterval().getLowReturnEdge()] = -1;
+        }
+    }
+
+    /** One more conflict pair to consider */
+    if (!this->S.empty()) {
+        ConfPair::ConflictPair P = this->S.top();
+        this->S.pop();
+        /** Trime left interval BEGIN */
+        while ((P.getLeftInterval().getHighReturnEdge() != nullptr) &&
+               (!NodeElement::compare(*(P.getLeftInterval().getHighReturnEdge()->target()), *u))) {
+            P.getLeftInterval().setHighReturnEdge(this->ref[P.getLeftInterval().getHighReturnEdge()]);
+        }
+        if ((P.getLeftInterval().getHighReturnEdge() == nullptr) && (P.getLeftInterval().getLowReturnEdge() != nullptr)) {
+            /** Just emptied */
+            this->ref[P.getLeftInterval().getLowReturnEdge()] = P.getRightInterval().getLowReturnEdge();
+            this->side[P.getLeftInterval().getLowReturnEdge()] = -1;
+            P.getLeftInterval().setLowReturnEdge(nullptr);
+        }
+        /** Trime left interval END */
+
+        /** Trim right interval */
+        this->S.push(P);
+    }
+}
+
+int AlgorithmLeftRight::lowest(ConfPair::ConflictPair &P) {
+    if (P.getLeftInterval().isEmpty()) {
+        return this->lowopt[P.getRightInterval().getLowReturnEdge()];
+    }
+    if (P.getRightInterval().isEmpty()) {
+        return this->lowopt[P.getLeftInterval().getLowReturnEdge()];
+    }
+    return std::min(this->lowopt[P.getLeftInterval().getLowReturnEdge()], this->lowopt[P.getRightInterval().getLowReturnEdge()]);
 }

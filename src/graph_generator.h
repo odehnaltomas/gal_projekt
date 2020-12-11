@@ -1,5 +1,4 @@
 #pragma once
-#include <ogdf/basic/graph_generators.h>
 #include <ogdf/layered/DfsAcyclicSubgraph.h>
 #include <ogdf/fileformats/GraphIO.h>
 #include <ogdf/layered/MedianHeuristic.h>
