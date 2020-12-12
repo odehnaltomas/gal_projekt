@@ -3,7 +3,7 @@
 
 #include "cli_opts.h"
 #include "algorithms/left_right.h"
-#include "algorithms/boyer_myrvold.h"
+#include "algorithms/hopcroft_tarjan.h"
 #include "graph_generator.h"
 
 using namespace ogdf;
@@ -42,8 +42,8 @@ int main(int argc, char **argv)
 		AlgorithmLeftRight a(g, ga);
 		result = a.isPlanar();
 		
-	} else if (args.algorithm == Algorithm::BoyerMyrvold) {
-		AlgorithmBoyerMyrvold a(g, ga);
+	} else if (args.algorithm == Algorithm::HopcroftTarjan) {
+		AlgorithmHopcroftTarjan a(g, ga);
 		result = a.isPlanar();
 	}
 	
