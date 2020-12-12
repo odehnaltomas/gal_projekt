@@ -7,6 +7,7 @@
 
 // Debug Macros
 #define DEBUG_ENABLED 1
+#define PRE_INDEXING 1
 
 #ifdef DEBUG_ENABLED
 #define DEBUG(...) fprintf(stderr, __VA_ARGS__)

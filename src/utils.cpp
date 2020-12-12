@@ -31,9 +31,9 @@ namespace DFS
             ExtractBiconnectedComponent(n);
         }
 
-        for (auto v : this->nodes_pre) {
-            BuildReachable(v);
-        }
+        // for (auto v : this->nodes_pre) {
+        //     BuildReachable(v);
+        // }
     }
         
     node DFS::parent(node v) {
