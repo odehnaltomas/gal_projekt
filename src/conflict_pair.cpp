@@ -11,11 +11,11 @@ namespace ConfPair {
         return ConflictPair(fstInt, sndInt);
     }
 
-    EdgeInt::EdgeInterval ConflictPair::getLeftInterval() {
+    EdgeInt::EdgeInterval& ConflictPair::getLeftInterval() {
         return this->leftInterval;
     }
 
-    EdgeInt::EdgeInterval ConflictPair::getRightInterval() {
+    EdgeInt::EdgeInterval& ConflictPair::getRightInterval() {
         return this->rightInterval;
     }
 
@@ -43,5 +43,10 @@ namespace ConfPair {
 
     bool ConflictPair::isEmpty() {
         return (this->leftInterval.isEmpty() && this->rightInterval.isEmpty());
+    }
+
+    string ConflictPair::toStr(GraphAttributes& GA) {
+        this->leftInterval.toString(GA);
+        return "CONFLICT PAIR:\n\tL: " + this->leftInterval.toString(GA) + "\n\tR: " + this->rightInterval.toString(GA) + "\n";
     }
 }

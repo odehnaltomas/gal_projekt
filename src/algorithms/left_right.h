@@ -38,7 +38,8 @@ private:
     void doDFS1(node v);
     bool doDFS2(node v);
     bool addConstraints(edge e, edge parentEdge);
-    bool conflicting(EdgeInt::EdgeInterval& interval, edge b);
+    bool conflicting(EdgeInt::EdgeInterval interval, edge b);
     void trimBackEdges(node u);
     int lowest(ConfPair::ConflictPair& P);
+    void showStack(std::stack<ConfPair::ConflictPair> S);
 };
