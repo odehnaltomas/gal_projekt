@@ -28,4 +28,20 @@ namespace EdgeInt {
     bool EdgeInterval::isEmpty() {
         return ((this->lowReturnEdge == nullptr) && (this->highReturnEdge == nullptr));
     }
+
+    string EdgeInterval::toString(GraphAttributes& GA) {
+        string str = "low: ";
+        if (this->lowReturnEdge == nullptr) {
+            str.append("NULL");
+        } else {
+            str.append(GA.label(this->lowReturnEdge));
+        }
+        str.append(", high: ");
+        if(this->highReturnEdge == nullptr) {
+            str.append("NULL");
+        } else {
+            str.append(GA.label(this->highReturnEdge));
+        }
+        return str;
+    }
 }

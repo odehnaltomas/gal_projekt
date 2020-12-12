@@ -1,6 +1,7 @@
 #pragma once
 #include <ogdf/basic/Graph.h>
 #include <ogdf/basic/EdgeArray.h>
+#include <ogdf/basic/GraphAttributes.h>
 
 using namespace ogdf;
 
@@ -15,6 +16,7 @@ namespace EdgeInt {
         edge getLowReturnEdge();
         edge getHighReturnEdge();
         bool isEmpty();
+        string toString(GraphAttributes& GA);
 
     private:
         edge lowReturnEdge;

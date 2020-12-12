@@ -1,4 +1,5 @@
 #pragma once
+#include <ogdf/basic/GraphAttributes.h>
 
 #include "edge_interval.h"
 
@@ -9,13 +10,14 @@ namespace ConfPair {
     public:
         ConflictPair(EdgeInt::EdgeInterval &leftInterval, EdgeInt::EdgeInterval &rightInterval);
         static ConflictPair getEmptyConflictPair();
-        EdgeInt::EdgeInterval getLeftInterval();
-        EdgeInt::EdgeInterval getRightInterval();
+        EdgeInt::EdgeInterval& getLeftInterval();
+        EdgeInt::EdgeInterval& getRightInterval();
         void setLeftInterval(EdgeInt::EdgeInterval interval);
         void setRightInterval(EdgeInt::EdgeInterval interval);
 //        bool isIntervalEmpty(Interval);
         void swapIntervals();
         bool isEmpty();
+        string toStr(GraphAttributes& GA);
 
     private:
         EdgeInt::EdgeInterval leftInterval;
