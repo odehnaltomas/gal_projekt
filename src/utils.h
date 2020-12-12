@@ -6,7 +6,7 @@
 #include<ogdf/basic/GraphAttributes.h>
 
 // Debug Macros
-//#define DEBUG_ENABLED 1
+#define DEBUG_ENABLED 1
 
 #ifdef DEBUG_ENABLED
 #define DEBUG(...) fprintf(stderr, __VA_ARGS__)
@@ -49,6 +49,7 @@ namespace DFS
         int post(node v);
         int low1(node v);
         int low2(node v);
+        node preToNode(int pre_id);
 
         EdgeType edgeType(edge e);
         EdgeType edgeType(adjEntry adj);
@@ -61,7 +62,8 @@ namespace DFS
         std::stack<node> nodes_depth;
 
         std::map<int, node> parents;
-
+        std::map<int, node> pre_order_reverse;
+        
         NodeOrderMapping pre_order;
         NodeOrderMapping post_order;
         NodeOrderMapping lowpt1;

@@ -43,6 +43,10 @@ namespace DFS
     int DFS::pre(node v) {
         return pre_order[v->index()];
     }
+        
+    node DFS::preToNode(int pre_id) {
+        return pre_order_reverse[pre_id];
+    }
 
     int DFS::post(node v) {
         return post_order[v->index()];
@@ -134,6 +138,7 @@ namespace DFS
         colours[v_id] = GRAY;
         // generate pre-order index
         pre_order[v_id] = timestamp++;
+        pre_order_reverse[pre_order[v_id]] = v;
         // set parent of v
         parents[v->index()] = parent;
 

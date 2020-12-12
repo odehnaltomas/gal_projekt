@@ -262,7 +262,7 @@ bool AlgorithmHopcroftTarjan::strongly_planar(adjEntry adj, std::list<int>& atta
 /// page 563
 ///
 bool AlgorithmHopcroftTarjan::pathfinder_alt(int v) {
-	auto _v = dfs.nodes_pre[v];
+	auto _v = dfs.preToNode(v);
 	DEBUG("pathfinder(%2d)\n  ", v);
 	DEBUG_EXPR(adjs_out[_v->index()].size());
 
