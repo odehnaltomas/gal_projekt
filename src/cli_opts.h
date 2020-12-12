@@ -20,6 +20,7 @@ struct Args {
 	std::string output_file;
 	bool output_file_provided;
 
+	bool test_mode = false;
 };
 typedef struct Args Args;
 

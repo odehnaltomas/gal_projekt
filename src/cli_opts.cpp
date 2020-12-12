@@ -10,7 +10,7 @@ Args parse_args(int argc, char **argv)
 	
 	for(;;)
 	{
-		switch(getopt(argc, argv, "a:f:n:h:gpn:m:o:"))
+		switch(getopt(argc, argv, "a:f:tn:h:gpn:m:o:"))
 		{
 			case 'a':
 				try {
@@ -27,6 +27,10 @@ Args parse_args(int argc, char **argv)
 				res.source_file = optarg;
 				res.source_file_provided = true;
 				continue;
+
+		    case 't':
+		        res.test_mode = true;
+                continue;
 
 		    case 'g':
 		        res.generate_graph = true;
@@ -55,6 +59,7 @@ Args parse_args(int argc, char **argv)
 				std::cerr << "Usage example: " << std::endl <<
 				"\t" << "-a {left-right|hopcroft-tarjan} - choose algorithm to test if graph is planar." << std::endl <<
 				"\t" << "-f PATH - path to source file of graph." << std::endl <<
+				"\t" << "-t - turns on testing mode (outputs running time)" << std::endl <<
 				"\t" << "-g - generate (non-)planar graph:" << std::endl <<
 				"\t" << "-p - use this option to generate planar graph. NOTE: Non-planar graph will be complete graph" << std::endl <<
 				"\t" << "-n X - generated graph will have X nodes" << std::endl <<

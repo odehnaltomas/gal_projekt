@@ -146,12 +146,14 @@ bool AlgorithmHopcroftTarjan::strongly_planar(adjEntry adj, std::list<int>& atta
 		auto first = true;
 		for (auto cycle_subadj : adjs_out[w->index()]) {
 		//for(adj = w->firstAdj(); adj; adj = adj->succ()) {
-			auto src = cycle_subadj->theNode();
 			auto x = cycle_subadj->twinNode();
+#ifdef DEBUG_ENABLED
+			auto src = cycle_subadj->theNode();
 			DEBUG("    validating edge %2d (%2d [pre %2d] -> %2d [pre %2d])\n",
 				cycle_subadj->theEdge()->index(),
 				src->index(), dfs.pre(src),
 				x->index(), dfs.pre(x));
+#endif
 
 			if (first) {
 				first = false;
@@ -576,16 +578,7 @@ bool AlgorithmHopcroftTarjan::isPlanar() {
 	auto edges = orderedEdges();
 	cycles = pathfinder(dfs.nodes_pre[0]);
 	
-	DEBUG("\nDF-Tree:\n");
-	for (auto v : dfsForest) {
-		auto pre = dfs.pre(v);
-		auto post = dfs.post(v);
-		auto lowpt1 = dfs.low1(v);
-		auto lowpt2 = dfs.low2(v);
-		DEBUG("    %2s (%2d) = %3d, %3d, L1: %3d, L2: %3d\n",
-			GA.label(v).c_str(), v->index(), pre, post, lowpt1, lowpt2);
-	}
-	
+#ifdef DEBUG_ENABLED
 	DEBUG("\nBi-connected components:\n");
 	for (auto component : dfs.biconnected) {
 		DEBUG("  Component contains:\n");
@@ -598,6 +591,7 @@ bool AlgorithmHopcroftTarjan::isPlanar() {
 				GA.label(v).c_str(), v->index(), pre, post, lowpt1, lowpt2);
 		}
 	}
+#endif
 
 	if (dfs.biconnected.size() > 1) {
 		DEBUG("  Splitting components into subgraphs:\n");
@@ -618,6 +612,8 @@ bool AlgorithmHopcroftTarjan::isPlanar() {
 
 			DEBUG("    Created subgraph (%d nodes, %d edges):\n",
 				CG.numberOfNodes(), CG.numberOfEdges());
+
+#ifdef DEBUG_ENABLED
 			for (auto edge : CG.edges) {
 				auto adj = edge->adjSource();
 				auto u = adj->theNode();
@@ -626,6 +622,7 @@ bool AlgorithmHopcroftTarjan::isPlanar() {
 				DEBUG("      %2d: %2d -> %2d\n",
 					edge->index(), u->index(), v->index());
 			}
+#endif
 
 			DEBUG("    {\n");
 			auto algo = AlgorithmHopcroftTarjan(CG, CGA);
@@ -641,7 +638,20 @@ bool AlgorithmHopcroftTarjan::isPlanar() {
 
 		return true;
 	}
+	
+#ifdef DEBUG_ENABLED
+	DEBUG("\nDF-Tree:\n");
+	for (auto v : dfsForest) {
+		auto pre = dfs.pre(v);
+		auto post = dfs.post(v);
+		auto lowpt1 = dfs.low1(v);
+		auto lowpt2 = dfs.low2(v);
+		DEBUG("    %2s (%2d) = %3d, %3d, L1: %3d, L2: %3d\n",
+			GA.label(v).c_str(), v->index(), pre, post, lowpt1, lowpt2);
+	}
+#endif
 
+#ifdef DEBUG_ENABLED
 	DEBUG("\nOrdered edges:\n");
 	for (auto entry : edges) {
 		auto w_adj = entry.second;
@@ -653,7 +663,9 @@ bool AlgorithmHopcroftTarjan::isPlanar() {
 			GA.label(w).c_str(), w->index(),
 			dfs.edgeType(w_adj) == EdgeType::BACK ? "IS BACK" : "");
 	}
+#endif
 
+#ifdef DEBUG_ENABLED
 	DEBUG("\nPaths:\n");
 	DEBUG_EXPR(cycles.size());
 	for (auto path : cycles) {
@@ -679,6 +691,7 @@ bool AlgorithmHopcroftTarjan::isPlanar() {
 
 		DEBUG("\n");
 	}
+#endif
 
 	auto attachments = std::list<int>();
 	auto result = false;
@@ -686,11 +699,13 @@ bool AlgorithmHopcroftTarjan::isPlanar() {
 		result = strongly_planar(adjs_out[dfs.nodes_pre[0]->index()][0], attachments);
 
 	} catch (char const *e) {
-		printf("ERROR IN strongly_planar: %s\n", e);
+		DEBUG("ERROR IN strongly_planar: %s\n", e);
 		return false;
 	}
 
+#ifdef DEBUG_ENABLED
 	auto result_alt = embed();
 	DEBUG("result: %d\nresult alt: %d\n", result, result_alt);
+#endif
 	return result;
 }

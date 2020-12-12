@@ -6,14 +6,13 @@
 #include<ogdf/basic/GraphAttributes.h>
 
 // Debug Macros
-#define DEBUG_ENABLED 1
-#define PRE_INDEXING 1
+//#define DEBUG_ENABLED 1
 
 #ifdef DEBUG_ENABLED
 #define DEBUG(...) fprintf(stderr, __VA_ARGS__)
 #define DEBUG_EXPR(x) do { std::cerr << #x << ": " << x << std::endl; } while (0)
 #else 
-#define DEBUG(x) do {} while (0)
+#define DEBUG(...) do {} while (0)
 #define DEBUG_EXPR(x) do {} while (0)
 #endif
  

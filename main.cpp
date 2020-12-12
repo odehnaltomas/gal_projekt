@@ -1,4 +1,5 @@
 #include <iostream>
+#include <chrono>
 #include <ogdf/fileformats/GraphIO.h>
 
 #include "cli_opts.h"
@@ -8,10 +9,18 @@
 
 using namespace ogdf;
 
+///
+/// source: https://stackoverflow.com/a/55553669/3078351
+///
+double microtime() {
+    return (double(std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count()) / double(1000000));
+}
+
 int main(int argc, char **argv)
 {
 	// parse and validate arguments, print help, ...
 	Args args = parse_args(argc, argv);
+	
 
 	if (args.generate_graph) {
         auto g = new GraphGenerator();
@@ -27,6 +36,7 @@ int main(int argc, char **argv)
 //            std::cout << "Generated NON-PLANAR graph '" << args.output_file << "' with " <<
 //                      args.num_nodes << " and " << args.num_edges << " edges." << std::endl;
 	    }
+
         return 0;
     }
 
@@ -38,6 +48,8 @@ int main(int argc, char **argv)
     }
 	
 	bool result;
+	double time_start = microtime(), time_end;
+
 	if (args.algorithm == Algorithm::LeftRight) {
 		AlgorithmLeftRight a(g, ga);
 		result = a.isPlanar();
@@ -47,7 +59,11 @@ int main(int argc, char **argv)
 		result = a.isPlanar();
 	}
 	
-	std::cout << "Result: " << result << std::endl;
+	time_end = microtime();
+	if (args.test_mode)
+		printf("%f\n", time_end - time_start);
+	else
+		std::cout << "Is planar? " << (result ? "Yes" : "No") << std::endl;
 	
     return 0;
 }
