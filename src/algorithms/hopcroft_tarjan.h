@@ -13,20 +13,19 @@ using namespace ogdf;
 class Block
 {
 public:
-	Block(adjEntry e, std::list<int>& atts) {
-		LeftSegments.push_back(e);
+	Block(std::list<int>& atts) {
 		LeftAttachments.insert(LeftAttachments.end(), atts.begin(), atts.end());
 	}
 
 	void flip() {
 		std::swap(LeftAttachments, RightAttachments);
-		std::swap(LeftSegments, RightSegments);
 	}
 	void combine(Block b) {
 		LeftAttachments.insert(LeftAttachments.end(), b.LeftAttachments.begin(), b.LeftAttachments.end());
+		LeftAttachments.sort();
+		
 		RightAttachments.insert(RightAttachments.end(), b.RightAttachments.begin(), b.RightAttachments.end());
-		LeftSegments.insert(LeftSegments.end(), b.LeftSegments.begin(), b.LeftSegments.end());
-		RightSegments.insert(RightSegments.end(), b.RightSegments.begin(), b.RightSegments.end());
+		RightAttachments.sort();
 	}
 	bool clean(int node_id) {
 		while (!emptyLeftAtt() && headLeftAtt() == node_id) LeftAttachments.pop_front();
@@ -46,24 +45,36 @@ public:
 	int emptyLeftAtt() { return LeftAttachments.empty(); }
 	int emptyRightAtt() { return RightAttachments.empty(); }
 
-	bool interlacesLeft(std::stack<Block>& blocks) {
-		//if (emptyLeftAtt()) throw "Left Attachment list is never supposed to be empty!";
+	bool interlacesLeft(std::stack<Block> &blocks) {
+		DEBUG("        interlacesLeft():\n");
+		DEBUG("          "); DEBUG_EXPR(LeftAttachments.back());
+
+		if (emptyLeftAtt()) throw "Left Attachment list is never supposed to be empty!";
 		if (blocks.empty() || blocks.top().emptyLeftAtt()
-				|| LeftAttachments.back() >= blocks.top().headLeftAtt())
+				|| LeftAttachments.back() >= blocks.top().headLeftAtt()) {
+			DEBUG("          NO interlace left detected\n");
 			return false;
+		}
 		
+		DEBUG("          "); DEBUG_EXPR(blocks.top().headLeftAtt());
 		return true;
 	}
-	bool interlacesRight(std::stack<Block>& blocks) {
-		//if (emptyLeftAtt()) throw "Left Attachment list is never supposed to be empty!";
+	bool interlacesRight(std::stack<Block> &blocks) {
+		DEBUG("        interlacesRight():\n");
+		DEBUG("          "); DEBUG_EXPR(LeftAttachments.back());
+
+		if (emptyLeftAtt()) throw "Left Attachment list is never supposed to be empty!";
 		if (blocks.empty() || blocks.top().emptyRightAtt()
-				|| RightAttachments.back() >= blocks.top().headRightAtt())
+				|| RightAttachments.back() >= blocks.top().headRightAtt()) {
+			DEBUG("          NO interlace right detected\n");
 			return false;
+		}
 		
+		DEBUG("          "); DEBUG_EXPR(blocks.top().headRightAtt());
 		return true;
 	}
 
-	void addToAttachments(std::list<int> attachments, int node_id) {
+	void addToAttachments(std::list<int> &attachments, int node_id) {
 		if (!emptyRightAtt() && headRightAtt() > node_id) flip();
 		attachments.insert(attachments.begin(), LeftAttachments.begin(), LeftAttachments.end());
 		attachments.insert(attachments.begin(), RightAttachments.begin(), RightAttachments.end());
@@ -72,9 +83,6 @@ public:
 private:
 	std::list<int> LeftAttachments;
 	std::list<int> RightAttachments;
-
-	std::vector<adjEntry> LeftSegments;
-	std::vector<adjEntry> RightSegments;
 };
 
 class AlgorithmHopcroftTarjan

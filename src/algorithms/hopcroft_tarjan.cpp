@@ -86,22 +86,22 @@ std::vector<std::list<adjEntry>*> AlgorithmHopcroftTarjan::pathfinder(node v) {
 }
 
 void AlgorithmHopcroftTarjan::pathfinder(node v, std::list<adjEntry> *&path, std::vector<std::list<adjEntry>*>& paths) {
-	DEBUG("processing node %2s\n", GA.label(v).c_str());
+	DEBUG("processing node %2d\n", v->index());
 	for (auto w_adj : adjs_out[v->index()]) {
 		edgeOfCycle(w_adj, path);
 		auto w = GraphUtils::getTargetNodeFor(v, w_adj);
 
 		if (dfs.edgeType(w_adj) == EdgeType::TREE) {
-			DEBUG("  adding TREE edge %2s (%2s -> %2s)\n", GA.label(w_adj->theEdge()).c_str(),
-				GA.label(v).c_str(), GA.label(w).c_str());
+			DEBUG("  adding TREE edge %2d (%2d -> %2d)\n", w_adj->theEdge()->index(),
+				v->index(), w->index());
 
 			path->push_back(w_adj);
 			pathfinder(w, path, paths);
 
 		} else {
 			// BACK or FORWARD edges
-			DEBUG("  adding BACK/FWD edge %2s (%2s -> %2s)\n", GA.label(w_adj->theEdge()).c_str(),
-				GA.label(v).c_str(), GA.label(w).c_str());
+			DEBUG("  adding BACK/FWD edge %2d (%2d -> %2d)\n", w_adj->theEdge()->index(),
+				v->index(), w->index());
 
 			path->push_back(w_adj);
 			paths.push_back(path);
@@ -114,9 +114,9 @@ void AlgorithmHopcroftTarjan::pathfinder(node v, std::list<adjEntry> *&path, std
 }
 
 bool AlgorithmHopcroftTarjan::strongly_planar(adjEntry adj, std::list<int>& attachments) {
-	static auto iter = 0;
-	if (iter >= 5) return false;
-	iter++;
+	// static auto iter = 0;
+	// if (iter >= 5) return false;
+	// iter++;
 
 	auto blocks = std::stack<Block>();
 	auto cycle = edgeOfCycle(adj);
@@ -126,14 +126,15 @@ bool AlgorithmHopcroftTarjan::strongly_planar(adjEntry adj, std::list<int>& atta
 	// while ((*it)->theEdge()->index() != adj->theEdge()->index())
 	// 	it++;
 
-	DEBUG("strongly_planar cycle of %2s\n", GA.label(adj->theEdge()).c_str());
+	DEBUG("strongly_planar cycle of edge %2d\n", adj->theEdge()->index());
 	for (; it != ite; it++) {
 		auto cycle_adj = *it;
 
 		// 21
 		auto w = cycle_adj->theNode();
-		DEBUG("  validating edges of node %2s (from edge to %2s)\n",
-			GA.label(w).c_str(), GA.label(cycle_adj->twinNode()).c_str());
+		DEBUG("  validating edges of node %2d [pre %2d] (from edge to node %2d [pre %2d])\n",
+			w->index(), dfs.pre(w),
+			cycle_adj->twinNode()->index(), dfs.pre(cycle_adj->twinNode()));
 		
 		if (w->index() == adj->theNode()->index()) {
 			DEBUG("    reached original source, breaking\n");
@@ -141,12 +142,14 @@ bool AlgorithmHopcroftTarjan::strongly_planar(adjEntry adj, std::list<int>& atta
 		}
 
 		auto first = true;
-		for (auto adj : adjs_out[w->index()]) {
+		for (auto cycle_subadj : adjs_out[w->index()]) {
 		//for(adj = w->firstAdj(); adj; adj = adj->succ()) {
-			auto src = adj->theNode();
-			auto x = adj->twinNode();
-			DEBUG("    validating edge %2s: %2s -> %2s\n", GA.label(adj->theEdge()).c_str(),
-				GA.label(src).c_str(), GA.label(x).c_str());
+			auto src = cycle_subadj->theNode();
+			auto x = cycle_subadj->twinNode();
+			DEBUG("    validating edge %2d (%2d [pre %2d] -> %2d [pre %2d])\n",
+				cycle_subadj->theEdge()->index(),
+				src->index(), dfs.pre(src),
+				x->index(), dfs.pre(x));
 
 			if (first) {
 				first = false;
@@ -156,10 +159,12 @@ bool AlgorithmHopcroftTarjan::strongly_planar(adjEntry adj, std::list<int>& atta
 			
 			// 22
 			auto A = std::list<int>();
-			if (dfs.edgeType(adj) == EdgeType::TREE) {
-				DEBUG("      this is TREE edge\n");
-				if (!strongly_planar(adj, A))
+			if (dfs.edgeType(cycle_subadj) == EdgeType::TREE) {
+				DEBUG("      this is TREE edge, validating recursively\n");
+				DEBUG("      {\n");
+				if (!strongly_planar(cycle_subadj, A))
 					return false;
+				DEBUG("      }\n");
 
 			} else {
 				DEBUG("      this is BACK edge\n");
@@ -167,16 +172,31 @@ bool AlgorithmHopcroftTarjan::strongly_planar(adjEntry adj, std::list<int>& atta
 
 			}
 
+			DEBUG("      current recursive attachments\n      ");
+			DEBUG_EXPR(A.size());
+#ifdef DEBUG_ENABLED
+			for (auto att : A)
+				DEBUG("        - %2d\n", att);
+#endif
+
+			//DEBUG("      updating attachments\n");
+
 			// 23
-			auto b = Block(adj, A);
+			DEBUG("      validating attachments - edge(s) added\n");
+			auto b = Block(A);
 			while (true) {
-				if (b.interlacesLeft(blocks))
+				if (b.interlacesLeft(blocks)) {
+					DEBUG("        interlace left detected, flipping sides!\n");
 					blocks.top().flip();
+				}
 				
-				if (b.interlacesLeft(blocks))
+				if (b.interlacesLeft(blocks)) {
+					DEBUG("        interlace left still detected - NOT planar!\n");
 					return false;
+				}
 				
 				if (b.interlacesRight(blocks)) {
+					DEBUG("        interlace right detected, merging blocks!\n");
 					b.combine(blocks.top());
 					blocks.pop();
 
@@ -186,16 +206,60 @@ bool AlgorithmHopcroftTarjan::strongly_planar(adjEntry adj, std::list<int>& atta
 		}
 
 		// 24.
-
-		// 25.
-		attachments.clear();
+		while (!blocks.empty() && blocks.top().clean(dfs.pre(dfs.parent(w))))
+			blocks.pop();
 	}
+
+	auto back_edge_target = cycle->back()->twinNode();
+
+	// 25.
+	DEBUG("  processing block stack\n    ");
+	DEBUG_EXPR(blocks.size());
+
+	attachments.clear();
+	while (!blocks.empty()) {
+		auto b = blocks.top();
+		blocks.pop();
+
+		if (!b.emptyLeftAtt() && !b.emptyRightAtt()
+				&& b.headLeftAtt() > dfs.pre(back_edge_target)
+				&& b.headRightAtt() > dfs.pre(back_edge_target)) {
+			DEBUG("    block attachment check failed\n");
+			DEBUG("      "); DEBUG_EXPR(dfs.pre(back_edge_target));
+			DEBUG("        "); DEBUG_EXPR(b.headLeftAtt());
+			DEBUG("        "); DEBUG_EXPR(b.headRightAtt());
+			return false;
+
+		}
+
+		DEBUG("    adding block attachments\n");
+		b.addToAttachments(attachments, dfs.pre(back_edge_target));
+	}
+
+	if (back_edge_target->index() != cycle->front()->theNode()->index()) {
+		DEBUG("  adding cycle's back edge target node to attachments\n");
+		attachments.push_back(dfs.pre(back_edge_target));
+	}
+
+	attachments.sort();
+	attachments.unique();
+	DEBUG("  current attachments\n    ");
+	DEBUG_EXPR(attachments.size());
+#ifdef DEBUG_ENABLED
+	for (auto att : attachments)
+		DEBUG("    - %2d\n", att);
+#endif
 
 	return true;
 }
 
 bool AlgorithmHopcroftTarjan::isPlanar() {
-	DEBUG_EXPR(GA.directed());
+	if (G.numberOfEdges() > 3 * G.numberOfNodes() - 3
+			|| (G.numberOfNodes() >= 3 && G.numberOfEdges() > 3 * G.numberOfNodes() - 6)) {
+		DEBUG("PLANARITY PRECONDITION FAILED!\n");
+		return false;
+	}
+
 	auto dfsForest = dfs.nodes_pre;
 	auto edges = orderedEdges();
 	cycles = pathfinder(dfs.nodes_pre[0]);
@@ -311,12 +375,6 @@ bool AlgorithmHopcroftTarjan::isPlanar() {
 
 	} catch (char const *e) {
 		printf("ERROR IN strongly_planar: %s\n", e);
-		return false;
-	}
-
-	if (G.numberOfEdges() > 3 * G.numberOfNodes() - 3
-			|| (G.numberOfNodes() >= 3 && G.numberOfEdges() > 3 * G.numberOfNodes() - 6)) {
-		DEBUG("PLANARITY PRECONDITION FAILED!");
 		return false;
 	}
 
