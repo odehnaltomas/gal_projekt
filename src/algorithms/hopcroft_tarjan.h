@@ -22,10 +22,10 @@ public:
 	}
 	void combine(Block b) {
 		LeftAttachments.insert(LeftAttachments.end(), b.LeftAttachments.begin(), b.LeftAttachments.end());
-		LeftAttachments.sort();
+		LeftAttachments.sort(std::greater<>());
 
 		RightAttachments.insert(RightAttachments.end(), b.RightAttachments.begin(), b.RightAttachments.end());
-		RightAttachments.sort();
+		RightAttachments.sort(std::greater<>());
 	}
 	bool clean(int node_id) {
 		while (!emptyLeftAtt() && headLeftAtt() == node_id) LeftAttachments.pop_front();

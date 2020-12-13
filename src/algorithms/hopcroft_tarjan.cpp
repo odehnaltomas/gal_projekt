@@ -245,7 +245,7 @@ bool AlgorithmHopcroftTarjan::strongly_planar(adjEntry adj, std::list<int>& atta
 		attachments.push_back(dfs.pre(back_edge_target));
 	}
 
-	attachments.sort();
+	attachments.sort(std::greater<>());
 	attachments.unique();
 	DEBUG("  current attachments\n    ");
 	DEBUG_EXPR(attachments.size());
@@ -568,11 +568,11 @@ bool AlgorithmHopcroftTarjan::embed() {
 }
 
 bool AlgorithmHopcroftTarjan::isPlanar() {
-	if (G.numberOfEdges() > 3 * G.numberOfNodes() - 3
-			|| (G.numberOfNodes() >= 3 && G.numberOfEdges() > 3 * G.numberOfNodes() - 6)) {
-		DEBUG("PLANARITY PRECONDITION FAILED!\n");
-		return false;
-	}
+//	if (G.numberOfEdges() > 3 * G.numberOfNodes() - 3
+//			|| (G.numberOfNodes() >= 3 && G.numberOfEdges() > 3 * G.numberOfNodes() - 6)) {
+//		DEBUG("PLANARITY PRECONDITION FAILED!\n");
+//		return false;
+//	}
 
 	auto dfsForest = dfs.nodes_pre;
 	auto edges = orderedEdges();
@@ -703,9 +703,9 @@ bool AlgorithmHopcroftTarjan::isPlanar() {
 		return false;
 	}
 
-#ifdef DEBUG_ENABLED
-	auto result_alt = embed();
-	DEBUG("result: %d\nresult alt: %d\n", result, result_alt);
-#endif
+//#ifdef DEBUG_ENABLED
+//	auto result_alt = embed();
+//	DEBUG("result: %d\nresult alt: %d\n", result, result_alt);
+//#endif
 	return result;
 }
