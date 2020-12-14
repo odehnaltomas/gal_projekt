@@ -17,7 +17,7 @@ namespace CntSort
         for (node n : G.nodes) {
             CountingSort::sortNode(nodeOutEdges[n], nestingDepth);
         }
-        std::cout << "--------------COUNTING SORT DONE--------------" << std::endl;
+//        std::cout << "--------------COUNTING SORT DONE--------------" << std::endl;
 
 //        for (node n : G.nodes) {
 //            std::cout << std::endl << std::endl << "NODE: " << GA.label(n);

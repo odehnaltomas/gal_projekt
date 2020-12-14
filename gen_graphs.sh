@@ -51,7 +51,8 @@ elif [ $FILE_PREFIX = "planar" ]; then
 
         for ((i=1;i<=$2;i++));
         do
-                ./gal_projekt -g -p -n $i -m 9999 -o Graphs/${FILE_PREFIX}/${FILE_PREFIX}_${i}.gml
+                # We want maximum number of
+                ./gal_projekt -g -p -n $i -m 9999999 -o Graphs/${FILE_PREFIX}/${FILE_PREFIX}_${i}.gml
         done
 
 fi

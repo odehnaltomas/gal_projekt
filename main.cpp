@@ -1,6 +1,7 @@
 #include <iostream>
 #include <chrono>
 #include <ogdf/fileformats/GraphIO.h>
+#include <clocale>
 
 #include "cli_opts.h"
 #include "algorithms/left_right.h"
@@ -58,11 +59,12 @@ int main(int argc, char **argv)
 		AlgorithmHopcroftTarjan a(g, ga);
 		result = a.isPlanar();
 	}
-	
+
 	time_end = microtime();
-	if (args.test_mode)
+	if (args.test_mode) {
+        setlocale(LC_ALL, "cs_CZ");
 		printf("%f\n", time_end - time_start);
-	else
+    } else
 		std::cout << "Is planar? " << (result ? "Yes" : "No") << std::endl;
 	
     return 0;

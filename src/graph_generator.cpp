@@ -90,5 +90,5 @@ void GraphGenerator::createLayoutAndSave(Graph g, std::string fileName) {
     GraphIO::write(GA, fileName, GraphIO::writeGML);
 
     std::cout << "' with " << n << " and " << m << " edges." << std::endl;
-    std::cout << "***************************" << std::endl;
+   // std::cout << "***************************" << std::endl;
 }

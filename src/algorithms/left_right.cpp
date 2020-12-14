@@ -77,19 +77,19 @@ bool AlgorithmLeftRight::isPlanar() {
 //    }
     /** Testing part */
     CntSort::CountingSort::sort(this->GA, this->G, this->nodeOutEdges, this->nestingDepth);
-    for (node n : G.nodes) {
-        std::cout << std::endl << std::endl << "NODE: " << GA.label(n);
-        for (edge e : nodeOutEdges[n]) {
-            std::cout << "\tedge id: " << GA.label(e) << ", nestingDepth: " << nestingDepth[e] << std::endl;
-            std::cout << "\t\tsource: " << GA.label(e->source()) << ", target: " << GA.label(e->target()) << std::endl;
-        }
-    }
+//    for (node n : G.nodes) {
+//        std::cout << std::endl << std::endl << "NODE: " << GA.label(n);
+//        for (edge e : nodeOutEdges[n]) {
+//            std::cout << "\tedge id: " << GA.label(e) << ", nestingDepth: " << nestingDepth[e] << std::endl;
+//            std::cout << "\t\tsource: " << GA.label(e->source()) << ", target: " << GA.label(e->target()) << std::endl;
+//        }
+//    }
     for (node s : this->roots) {
         bool result = this->doDFS2(s);
         if (result) {
             return true;
         } else {
-            std::cout << "Graph is not planar." << std::endl;
+//            std::cout << "Graph is not planar." << std::endl;
         }
     }
 	return false;
@@ -97,7 +97,7 @@ bool AlgorithmLeftRight::isPlanar() {
 
 void AlgorithmLeftRight::doDFS1(node v) {
     edge parentEdge = this->parentEdgeArr[v];
-    std::cout << "node: " << GA.label(v) << std::endl;
+//    std::cout << "node: " << GA.label(v) << std::endl;
     for (adjEntry adj : v->adjEntries) {
         // If all edges are oriented stop
         if (this->allOriented == this->G.numberOfEdges()) {
@@ -106,14 +106,14 @@ void AlgorithmLeftRight::doDFS1(node v) {
 
         edge e = adj->theEdge();
         if (this->oriented[e]) {
-            adjEntry source = e->adjSource();
-            std::cout << "\talready oriented edge: " << GA.label(e) << std::endl;
-            std::cout << "\t\tsource: " << GA.label(source->theNode()) << ", target: " << GA.label(e->target()) << std::endl;
+//            adjEntry source = e->adjSource();
+//            std::cout << "\talready oriented edge: " << GA.label(e) << std::endl;
+//            std::cout << "\t\tsource: " << GA.label(source->theNode()) << ", target: " << GA.label(e->target()) << std::endl;
             continue;
         }
         adjEntry source = e->adjSource();
-        std::cout << "\tnon-oriented edge: " << GA.label(e) << std::endl;
-        std::cout << "\t\tsource: " << GA.label(source->theNode()) << ", target: " << GA.label(e->target()) << std::endl;
+//        std::cout << "\tnon-oriented edge: " << GA.label(e) << std::endl;
+//        std::cout << "\t\tsource: " << GA.label(source->theNode()) << ", target: " << GA.label(e->target()) << std::endl;
 
         node w;
         if (source->theNode() == v) { /** Edge has right orientation */
@@ -124,11 +124,11 @@ void AlgorithmLeftRight::doDFS1(node v) {
             this->nodeOutEdges[v].push_back(e);
         } else { /** Edge has wrong orientation must be tured (swap source and target nodes of edge) */
             //adjEntry target = e->adjTarget();
-            std::cout << "\t\tsource: " << GA.label(e->source()) << ", target: " << GA.label(e->target()) << std::endl << std::endl;
+//            std::cout << "\t\tsource: " << GA.label(e->source()) << ", target: " << GA.label(e->target()) << std::endl << std::endl;
             this->G.reverseEdge(e);
-            std::cout << "\t-TO-"<< std::endl;
-            std::cout << "\toriented edge: " << GA.label(e) << std::endl;
-            std::cout << "\t\tsource: " << GA.label(e->source()) << ", target: " << GA.label(e->target()) << std::endl << std::endl;
+//            std::cout << "\t-TO-"<< std::endl;
+//            std::cout << "\toriented edge: " << GA.label(e) << std::endl;
+//            std::cout << "\t\tsource: " << GA.label(e->source()) << ", target: " << GA.label(e->target()) << std::endl << std::endl;
             this->oriented[e] = true;
             this->allOriented++;
             w = e->target();
@@ -139,13 +139,13 @@ void AlgorithmLeftRight::doDFS1(node v) {
         this->lowopt[e] = this->height[v];
         this->lowopt2[e] = this->height[v];
         if (this->height[w] == this->height_max) { /** Tree edge */
-            std::cout << "\tedge: " << GA.label(e) << " is TREE EDGE" << std::endl;
+//            std::cout << "\tedge: " << GA.label(e) << " is TREE EDGE" << std::endl;
             this->parentEdgeArr[w] = e;
             this->height[w] = this->height[v] + 1;
             this->doDFS1(w);
-            std::cout << "return to node: " << GA.label(v) << std::endl;
+//            std::cout << "return to node: " << GA.label(v) << std::endl;
         } else { /** Back edge */
-            std::cout << "\tedge: " << GA.label(e) << " is BACKWARD EDGE" << std::endl;
+//            std::cout << "\tedge: " << GA.label(e) << " is BACKWARD EDGE" << std::endl;
             this->lowopt[e] = this->height[w];
         }
 
@@ -171,42 +171,42 @@ void AlgorithmLeftRight::doDFS1(node v) {
 
 bool AlgorithmLeftRight::doDFS2(node v) {
     edge parentEdge = this->parentEdgeArr[v];
-    std::cout << "START NODE: " << GA.label(v) << std::endl;
+//    std::cout << "START NODE: " << GA.label(v) << std::endl;
     for (edge e : this->nodeOutEdges[v]) {
-        std::cout << "start edge: " << GA.label(e) << std::endl;
-        std::cout << "stack size: " << this->S.size() << std::endl;
+//        std::cout << "start edge: " << GA.label(e) << std::endl;
+//        std::cout << "stack size: " << this->S.size() << std::endl;
         this->stackBottom[e] = this->S.size();
 
         edge trg_par_edge = this->parentEdgeArr[e->target()];
-        std::cout << "pred porovnanim" << std::endl;
+//        std::cout << "pred porovnanim" << std::endl;
 //        if (trg_par_edge != nullptr && (!EdgeElement::compare(*(trg_par_edge), *e))) { /** TREE EDGE */
         if (e == trg_par_edge) { /** TREE EDGE */
-            std::cout << "po porovnani - TREE EDGE" << std::endl;
+//            std::cout << "po porovnani - TREE EDGE" << std::endl;
             bool result = this->doDFS2(e->target());
-            std::cout << "BACK TO NODE: " << GA.label(v) << " with actual edge: " << GA.label(e) << std::endl;
+//            std::cout << "BACK TO NODE: " << GA.label(v) << " with actual edge: " << GA.label(e) << std::endl;
             if (!result) {
                 return false;
             }
         } else {
-            std::cout << "po porovnani - BACK EDGE" << std::endl;
+//            std::cout << "po porovnani - BACK EDGE" << std::endl;
             this->lowopt_edge[e] = e;
             EdgeInt::EdgeInterval fst_int = EdgeInt::EdgeInterval::getEmptyInterval();
             EdgeInt::EdgeInterval snd_int(e, e);
             ConfPair::ConflictPair conflictPair(fst_int, snd_int);
             this->S.push(ConfPair::ConflictPair(fst_int, snd_int));
-            std::cout << "Pushed " << conflictPair.toStr(this->GA) << " to STACK" << std::endl;
+//            std::cout << "Pushed " << conflictPair.toStr(this->GA) << " to STACK" << std::endl;
         }
 
-        std::cout << "lowopt hrany " << this->GA.label(e) << " je " << this->lowopt[e] << ", height uzlu " << this->GA.label(v) << " je " << this->height[v] << std::endl;
+//        std::cout << "lowopt hrany " << this->GA.label(e) << " je " << this->lowopt[e] << ", height uzlu " << this->GA.label(v) << " je " << this->height[v] << std::endl;
         if (this->lowopt[e] < this->height[v]) {
-            std::cout << "splnuje" << std::endl;
+//            std::cout << "splnuje" << std::endl;
             if (e == this->nodeOutEdges[v].front()) {
-                std::cout << this->GA.label(e) << "je prvni" << std::endl;
+//                std::cout << this->GA.label(e) << "je prvni" << std::endl;
                 this->lowopt_edge[parentEdge] = this->lowopt_edge[e];
             } else {
-                std::cout << "\tstart constraints" << std::endl;
+//                std::cout << "\tstart constraints" << std::endl;
                 bool result = addConstraints(e, parentEdge);
-                std::cout << "\tend constraints" << std::endl;
+//                std::cout << "\tend constraints" << std::endl;
                 if (!result) {
                     return false;
                 }
@@ -216,9 +216,9 @@ bool AlgorithmLeftRight::doDFS2(node v) {
 
     if (parentEdge != nullptr) {
         node u = parentEdge->source();
-        std::cout << "\tstart trim" << std::endl;
+//        std::cout << "\tstart trim" << std::endl;
         trimBackEdges(u);
-        std::cout << "\tend trim" << std::endl;
+//        std::cout << "\tend trim" << std::endl;
 
         if (this->lowopt[parentEdge] < this->height[u]) {
             edge hl = this->S.top().getLeftInterval().getHighReturnEdge();
@@ -242,36 +242,36 @@ bool AlgorithmLeftRight::doDFS2(node v) {
 bool AlgorithmLeftRight::addConstraints(edge e, edge parentEdge) {
     showStack(this->S);
     ConfPair::ConflictPair P = ConfPair::ConflictPair::getEmptyConflictPair();
-    std::cout << "P = " << P.toStr(this->GA) << std::endl;
+//    std::cout << "P = " << P.toStr(this->GA) << std::endl;
     while (this->S.size() > this->stackBottom[e]) {
         ConfPair::ConflictPair Q = this->S.top();
         this->S.pop();
 
-        std::cout << "Q = " << Q.toStr(this->GA) << std::endl;
+//        std::cout << "Q = " << Q.toStr(this->GA) << std::endl;
         if (!Q.getLeftInterval().isEmpty() ) {
-            std::cout << "Q.L neni prazdny -> udelej swap" << std::endl;
+//            std::cout << "Q.L neni prazdny -> udelej swap" << std::endl;
             Q.swapIntervals();
-            std::cout << "Q = " << Q.toStr(this->GA) << std::endl;
+//            std::cout << "Q = " << Q.toStr(this->GA) << std::endl;
         } else {
-            std::cout << "Q.L je prazdny -> zadny swap" << std::endl;
+//            std::cout << "Q.L je prazdny -> zadny swap" << std::endl;
         }
         if (!Q.getLeftInterval().isEmpty() ) {
             return false;
         } else {
-            std::cout << "stale planarni" << std::endl;
-            std::cout << "lowopt[Q.R.low] = " << this->lowopt[Q.getRightInterval().getLowReturnEdge()] << ", lowopt[parentEdge] = " << this->lowopt[parentEdge] << std::endl;
+//            std::cout << "stale planarni" << std::endl;
+//            std::cout << "lowopt[Q.R.low] = " << this->lowopt[Q.getRightInterval().getLowReturnEdge()] << ", lowopt[parentEdge] = " << this->lowopt[parentEdge] << std::endl;
             if (this->lowopt[Q.getRightInterval().getLowReturnEdge()] > this->lowopt[parentEdge]) { /** merge intervals */
                 if (P.getRightInterval().isEmpty()) {
-                    std::cout << "P.R je prazdny" << std::endl;
+//                    std::cout << "P.R je prazdny" << std::endl;
                     P.getRightInterval().setHighReturnEdge(Q.getRightInterval().getHighReturnEdge());
 //                    interval.setLowReturnEdge(nullptr);
 //                    P.setRightInterval(interval);
-                    std::cout << "P = " << P.toStr(this->GA) << std::endl;
+//                    std::cout << "P = " << P.toStr(this->GA) << std::endl;
                 } else {
                     this->ref[P.getRightInterval().getLowReturnEdge()] = Q.getRightInterval().getHighReturnEdge();
                 }
                 P.getRightInterval().setLowReturnEdge(Q.getRightInterval().getLowReturnEdge());
-                std::cout << "P = " << P.toStr(this->GA) << std::endl;
+//                std::cout << "P = " << P.toStr(this->GA) << std::endl;
             } else { /** make consistent */
                 this->ref[Q.getRightInterval().getLowReturnEdge()] = this->lowopt_edge[parentEdge];
             }
@@ -279,7 +279,7 @@ bool AlgorithmLeftRight::addConstraints(edge e, edge parentEdge) {
     }
 
     showStack(this->S);
-    std::cout << "totok" << std::endl;
+//    std::cout << "totok" << std::endl;
     while (conflicting(this->S.top().getLeftInterval(), e) || conflicting(this->S.top().getRightInterval(), e)) {
         ConfPair::ConflictPair Q = this->S.top();
         this->S.pop();
@@ -369,10 +369,10 @@ int AlgorithmLeftRight::lowest(ConfPair::ConflictPair &P) {
 }
 
 void AlgorithmLeftRight::showStack(std::stack<ConfPair::ConflictPair> s) {
-    std::cout << "------STACK------" << std::endl;
+//    std::cout << "------STACK------" << std::endl;
     while (!s.empty()) {
-        std::cout << s.top().toStr(this->GA);
+//        std::cout << s.top().toStr(this->GA);
         s.pop();
     }
-    std::cout << "------STACK END------" << std::endl;
+//    std::cout << "------STACK END------" << std::endl;
 }
