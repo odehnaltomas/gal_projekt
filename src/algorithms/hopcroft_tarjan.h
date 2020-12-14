@@ -65,7 +65,7 @@ public:
 
 		if (emptyLeftAtt()) throw "Left Attachment list is never supposed to be empty!";
 		if (blocks.empty() || blocks.top().emptyRightAtt()
-				|| RightAttachments.back() >= blocks.top().headRightAtt()) {
+				|| LeftAttachments.back() >= blocks.top().headRightAtt()) {
 			DEBUG("          NO interlace right detected\n");
 			return false;
 		}
