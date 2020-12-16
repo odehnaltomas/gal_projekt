@@ -110,14 +110,6 @@ protected:
 	std::vector<std::list<adjEntry>*> pathfinder(node v);
 	void pathfinder(node v, std::list<adjEntry> *&path, std::vector<std::list<adjEntry>*>& paths);
 
-	std::map<int, int> next, stack, path, f;
-	std::stack<std::pair<int, int>> B;
-
-	int p, s, free;
-
-	bool pathfinder_alt(int v);
-	bool embed();
-
 	bool strongly_planar(adjEntry adj, std::list<int>& attachments);
 
 	std::vector<std::pair<int, adjEntry>> orderedEdges();
