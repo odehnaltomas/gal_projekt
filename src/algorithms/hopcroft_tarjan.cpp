@@ -568,11 +568,11 @@ bool AlgorithmHopcroftTarjan::embed() {
 }
 
 bool AlgorithmHopcroftTarjan::isPlanar() {
-//	if (G.numberOfEdges() > 3 * G.numberOfNodes() - 3
-//			|| (G.numberOfNodes() >= 3 && G.numberOfEdges() > 3 * G.numberOfNodes() - 6)) {
-//		DEBUG("PLANARITY PRECONDITION FAILED!\n");
-//		return false;
-//	}
+	if (G.numberOfEdges() > 3 * G.numberOfNodes() - 3
+			|| (G.numberOfNodes() >= 3 && G.numberOfEdges() > (3 * G.numberOfNodes() - 6))) {
+		DEBUG("PLANARITY PRECONDITION FAILED!\n");
+		return false;
+	}
 
 	auto dfsForest = dfs.nodes_pre;
 	auto edges = orderedEdges();

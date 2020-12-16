@@ -6,7 +6,7 @@
 #include<ogdf/basic/GraphAttributes.h>
 
 // Debug Macros
-#define DEBUG_ENABLED 1
+//#define DEBUG_ENABLED 1
 
 #ifdef DEBUG_ENABLED
 #define DEBUG(...) fprintf(stderr, __VA_ARGS__)

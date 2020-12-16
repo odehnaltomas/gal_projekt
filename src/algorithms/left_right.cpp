@@ -32,10 +32,11 @@ bool AlgorithmLeftRight::isPlanar() {
         return true;
     }
 
-//    if (this->G.numberOfEdges() > (3 * this->G.numberOfNodes() - 6)) {
-//        // Planar graph can have at most (3 * N - 6), N - number of nodes
-//        return false;
-//    }
+    if (this->G.numberOfEdges() > (3 * this->G.numberOfNodes() - 6)) {
+        // Planar graph can have at most (3 * N - 6), N - number of nodes
+        std::cout << "wow" << std::endl;
+        return false;
+    }
 
     /** Orientation part */
     for (node s : this->G.nodes) {

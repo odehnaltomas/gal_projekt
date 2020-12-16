@@ -23,12 +23,12 @@ void GraphGenerator::generatePlanarGraph(unsigned int num_nodes, unsigned int nu
 void GraphGenerator::generateNonplanarGraph(unsigned int num_nodes, std::string fileName) {
     Graph g;
 
-    completeGraph(g, num_nodes);
+    randomSimpleGraph(g, num_nodes, 3*num_nodes-6);
     std::cout << "***************************" << std::endl;
     std::cout << "num nodes: " << num_nodes << ", num edges: " << g.numberOfEdges() << std::endl;
 
     BoothLueker b;
-    if (isBiconnected(g)) {
+    if (!isBiconnected(g)) {
         std::cout << "is no biconnected -> transforming to biconnected" << std::endl;
         makeBiconnected(g);
     }
