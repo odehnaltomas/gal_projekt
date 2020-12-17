@@ -11,8 +11,11 @@ if [ "$1" = "left-right" ]; then
 elif [ "$1" = "hopcroft-tarjan" ]; then
 	>&2 echo "Testing HOPCROGT-TARJAN planarity algorithm:"
   ALG="hopcroft-tarjan"
+elif [ "$1" = "ref" ]; then # Added after presentation
+	>&2 echo "Testing REFERENCE planarity algorithm:"
+  ALG="ref"
 else
-	>&2 echo "Bad argument! 'left-right' or 'hopcroft-tarjan' is correct!"
+	>&2 echo "Bad argument! 'left-right', 'hopcroft-tarjan' or 'ref' is correct!"
 	exit 1
 fi
 

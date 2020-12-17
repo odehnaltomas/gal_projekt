@@ -1,6 +1,7 @@
 #include <iostream>
 #include <chrono>
 #include <ogdf/fileformats/GraphIO.h>
+#include <ogdf/basic/extended_graph_alg.h>
 #include <clocale>
 
 #include "cli_opts.h"
@@ -58,6 +59,8 @@ int main(int argc, char **argv)
 	} else if (args.algorithm == Algorithm::HopcroftTarjan) {
 		AlgorithmHopcroftTarjan a(g, ga);
 		result = a.isPlanar();
+	} else if (args.algorithm == Algorithm::Reference) { // Added after presentation
+	    result = isPlanar(g);
 	}
 
 	time_end = microtime();
